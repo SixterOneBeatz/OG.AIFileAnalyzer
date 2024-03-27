@@ -1,3 +1,22 @@
 ﻿@page "/Historical"
+@using OG.AIFileAnalyzer.Client.Services.Historical
+@using OG.AIFileAnalyzer.Common.Entities
 
-<h3>Historical</h3>
+<RadzenDataGrid @ref="logsGrid"
+                AllowPaging="true"
+                AllowSorting="true"
+                IsLoading="@isLoading"
+                Data="@(logs)"
+                TItem="LogEntity"
+                Count="@count"
+                LoadData="@LoadData"
+                PageSize="10"
+                PagerHorizontalAlign="HorizontalAlign.Center">
+    <Columns>
+        <RadzenDataGridColumn TItem="LogEntity" Property="Id" Title="Id" Width="10%"/>
+        <RadzenDataGridColumn TItem="LogEntity" Property="ActionType" Title="Action" Width="15%"/>
+        <RadzenDataGridColumn TItem="LogEntity" Property="Date" Title="Date" Width="15%" />
+        <RadzenDataGridColumn TItem="LogEntity" Property="Description" Title="Description" Width="40%"/>
+        <RadzenDataGridColumn TItem="LogEntity" Property="Details" Title="Details" Width="20%" />
+    </Columns>
+</RadzenDataGrid>

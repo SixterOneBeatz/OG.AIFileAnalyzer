@@ -1,4 +1,5 @@
 ﻿using OG.AIFileAnalyzer.Business.Analyzer;
+using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 using OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork;
 using System;
@@ -22,6 +23,17 @@ namespace OG.AIFileAnalyzer.Business.Historical
         public async Task<List<LogEntity>> GetHistorical()
         {
             return await _unitOfWork.Repository<LogEntity>().GetAllAsync();
+        }
+
+        public async Task<HistoricalResultDTO> GetHistorical(HistoricalFilterDTO filter)
+        {
+            var (values, total) = await _unitOfWork.Repository<LogEntity>().GetAsync(filter.Skip, filter.Take);
+
+            return new()
+            {
+                Rows = values,
+                TotalRows = total
+            };
         }
     }
 }

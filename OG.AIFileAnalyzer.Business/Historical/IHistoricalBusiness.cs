@@ -1,4 +1,5 @@
-﻿using OG.AIFileAnalyzer.Common.Entities;
+﻿using OG.AIFileAnalyzer.Common.DTOs;
+using OG.AIFileAnalyzer.Common.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace OG.AIFileAnalyzer.Business.Historical
 {
     public interface IHistoricalBusiness
     {
-        Task<List<LogEntity>> GetHistorical();
+        Task<HistoricalResultDTO> GetHistorical(HistoricalFilterDTO filter);
         Task AddHistorical(LogEntity entity);
     }
 }

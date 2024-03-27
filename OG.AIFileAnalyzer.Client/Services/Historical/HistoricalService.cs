@@ -1,4 +1,5 @@
-﻿using OG.AIFileAnalyzer.Common.Entities;
+﻿using OG.AIFileAnalyzer.Common.DTOs;
+using OG.AIFileAnalyzer.Common.Entities;
 using System.Net.Http;
 
 namespace OG.AIFileAnalyzer.Client.Services.Historical
@@ -10,9 +11,9 @@ namespace OG.AIFileAnalyzer.Client.Services.Historical
             await PostAsync("Historical/Add", log);
         }
 
-        public async Task<List<LogEntity>> GetAll()
+        public async Task<HistoricalResultDTO> GetQueryable(HistoricalFilterDTO filter)
         {
-            return await GetAsync<List<LogEntity>>("Historical/GetAll");
+            return await PostAsync<HistoricalResultDTO, HistoricalFilterDTO>("Historical/GetQueryable", filter);
         }
     }
 }

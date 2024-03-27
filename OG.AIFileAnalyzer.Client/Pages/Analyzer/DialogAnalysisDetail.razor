@@ -4,7 +4,7 @@
     <RadzenText TextStyle="TextStyle.H6">Document type: @AnalysisData.DocumentType.ToString()</RadzenText>
     @if (AnalysisData.DocumentType == DocType.Invoice)
     {
-        <InvoiceFieldsTable Fields="AnalysisData.Data.Select(x=> Tuple.Create(x.Value, x.Value))" />
+        <InvoiceFieldsTable Fields="AnalysisData.Data.Select(x => Tuple.Create(x.Key, x.Value))" />
     }
     else
     {

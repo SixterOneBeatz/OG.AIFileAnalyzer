@@ -49,6 +49,8 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
                 Description = "AI Analysis Runned"
             });
 
+            await _unitOfWork.Complete();
+
             return result;
         }
     }

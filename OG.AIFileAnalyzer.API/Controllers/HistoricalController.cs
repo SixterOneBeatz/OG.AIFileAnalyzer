@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OG.AIFileAnalyzer.Business.Historical;
+using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 
 namespace OG.AIFileAnalyzer.API.Controllers
@@ -11,10 +12,10 @@ namespace OG.AIFileAnalyzer.API.Controllers
     {
         private readonly IHistoricalBusiness _historicalBusiness = historicalBusiness;
 
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll() 
+        [HttpPost("GetQueryable")]
+        public async Task<IActionResult> GetQueryable([FromBody] HistoricalFilterDTO filter)
         {
-            var result = await _historicalBusiness.GetHistorical();
+            var result = await _historicalBusiness.GetHistorical(filter);
             return Ok(result);
         }
 
