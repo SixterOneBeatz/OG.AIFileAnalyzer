@@ -1,0 +1,6 @@
+@OG.AIFileAnalyzer.API_HostAddress = http://localhost:5058
+
+GET {{OG.AIFileAnalyzer.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
