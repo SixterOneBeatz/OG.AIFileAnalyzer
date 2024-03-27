@@ -5,13 +5,13 @@ VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OG.AIFileAnalyzer.Client", "OG.AIFileAnalyzer.Client\OG.AIFileAnalyzer.Client.csproj", "{26CFF88D-3FC8-4A2C-A2FC-C5444E52B09A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OG.AIFileAnalyzer.API", "OG.AIFileAnalyzer.API\OG.AIFileAnalyzer.API.csproj", "{4E8C7882-541A-4AAE-89F9-68628D6CFB05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OG.AIFileAnalyzer.API", "OG.AIFileAnalyzer.API\OG.AIFileAnalyzer.API.csproj", "{4E8C7882-541A-4AAE-89F9-68628D6CFB05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OG.AIFileAnalyzer.Business", "OG.AIFileAnalyzer.Business\OG.AIFileAnalyzer.Business.csproj", "{E360EE78-EBAA-434B-B480-358FDCC5D92F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OG.AIFileAnalyzer.Business", "OG.AIFileAnalyzer.Business\OG.AIFileAnalyzer.Business.csproj", "{E360EE78-EBAA-434B-B480-358FDCC5D92F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OG.AIFileAnalyzer.Common", "OG.AIFileAnalyzer.Common\OG.AIFileAnalyzer.Common.csproj", "{77B9457C-B695-45A9-AA3D-F4C8737B9D20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OG.AIFileAnalyzer.Common", "OG.AIFileAnalyzer.Common\OG.AIFileAnalyzer.Common.csproj", "{77B9457C-B695-45A9-AA3D-F4C8737B9D20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OG.AIFileAnalyzer.Persistence", "OG.AIFileAnalyzer.Persistence\OG.AIFileAnalyzer.Persistence.csproj", "{9551FB46-06F5-442A-ADD1-392B78661424}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OG.AIFileAnalyzer.Persistence", "OG.AIFileAnalyzer.Persistence\OG.AIFileAnalyzer.Persistence.csproj", "{9551FB46-06F5-442A-ADD1-392B78661424}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,15 @@
+﻿<div class="card-container">
+    @foreach (var item in Summaries)
+    {
+        <div Class="rz-p-0 rz-p-md-12">
+            <RadzenCard Variant="Variant.Flat" Class="rz-my-12 rz-mx-auto">
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Class="rz-p-4">
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-display-flex rz-mt-2 rz-my-0">@item.Key</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline"><b>@item.Value</b></RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        </div>
+    }
+</div>

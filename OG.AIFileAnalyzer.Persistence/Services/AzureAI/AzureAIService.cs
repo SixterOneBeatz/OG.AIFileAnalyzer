@@ -13,6 +13,7 @@ using Azure.AI.FormRecognizer.Models;
 using Azure.AI.TextAnalytics;
 using Microsoft.Extensions.Configuration;
 using OG.AIFileAnalyzer.Common.DTOs;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
 {
@@ -33,7 +34,7 @@ namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
             _textAnalyticsClient = new TextAnalyticsClient(new Uri(textAnalyzeEndPoint), new AzureKeyCredential(textAnalyzeKey));
         }
 
-        public async Task<AnalysisResponseDTO> RunInvoiceAnalysis(MemoryStream document)
+        public async Task<Dictionary<string,string>> RunInvoiceAnalysis(MemoryStream document)
         {
             AnalyzeDocumentOperation operation = await _documentAnalysisClient.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", document);
             AnalyzeResult result = operation.Value;
@@ -41,16 +42,11 @@ namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
             var docto = result.Documents.FirstOrDefault();
 
             var keyValuePairs = docto.Fields.Select(x => new { x.Key, Value = x.Value.Content }).ToDictionary(x => x.Key, y => y.Value);
-            var docType = docto.DocumentType;
 
-            return new()
-            {
-                Data = keyValuePairs,
-                DocumentType = docType,
-            };
+            return keyValuePairs;
         }
 
-        public async Task<AnalysisResponseDTO> RunTextAnalysis(MemoryStream document)
+        public async Task<Dictionary<string, string>> RunTextAnalysis(MemoryStream document)
         {
             RecognizeContentOperation formOperation = await _formRecognizerClient.StartRecognizeContentAsync(document);
 
@@ -90,11 +86,7 @@ namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
                 }
             }
 
-            return new()
-            {
-                Data = data,
-                DocumentType = "Text General"
-            };
+            return data;
         }
     }
 }

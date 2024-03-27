@@ -1,13 +1,19 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using OG.AIFileAnalyzer.Client.Services.Analyzer;
+using OG.AIFileAnalyzer.Common.Consts;
+using OG.AIFileAnalyzer.Common.DTOs;
+using Radzen;
 
 namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
 {
-    public partial class Analyzer
+    public partial class DragNDrop
     {
         [Inject]
         private IAnalyzerService AnalyzerService { get;set; }
+
+        [Inject]
+        private DialogService DialogService { get;set; }
 
         async Task OnChange(InputFileChangeEventArgs e)
         {
@@ -21,6 +27,11 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
                 var base64String = Convert.ToBase64String(buffer);
 
                 var data = await AnalyzerService.Analyze(base64String);
+
+                await DialogService.OpenAsync<DialogAnalysisDetail>("Analysis Result", new()
+                {
+                    { "AnalysisData", data },
+                });
             }
         }
     }

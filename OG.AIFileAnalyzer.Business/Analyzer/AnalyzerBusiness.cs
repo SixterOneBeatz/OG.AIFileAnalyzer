@@ -1,4 +1,5 @@
-﻿using OG.AIFileAnalyzer.Common.DTOs;
+﻿using OG.AIFileAnalyzer.Common.Consts;
+using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,12 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
             byte[] bytes = Convert.FromBase64String(base64Content);
             using (MemoryStream ms = new(bytes))
             {
-                result = await _azureAIService.RunInvoiceAnalysis(ms);
+                var data = await _azureAIService.RunInvoiceAnalysis(ms);
+                result = new()
+                {
+                    Data = data,
+                    DocumentType = DocType.Invoice
+                };
             }
 
             if (!result.Data.ContainsKey("InvoiceNumer") && !result.Data.ContainsKey("InvoiceTotal"))
@@ -25,7 +31,12 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
                 bytes = Convert.FromBase64String(base64Content);
                 using (MemoryStream ms = new(bytes))
                 {
-                    result = await _azureAIService.RunTextAnalysis(ms);
+                    var data = await _azureAIService.RunTextAnalysis(ms);
+                    result = new()
+                    {
+                        Data = data,
+                        DocumentType = DocType.GeneralText
+                    };
                 }
             }
 

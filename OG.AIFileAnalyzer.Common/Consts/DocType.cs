@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace OG.AIFileAnalyzer.Common.Consts
 {
-    public enum AllowedFiles
+    public enum DocType
     {
-        PDF,
-        JPEG,
-        JPG,
-        PNG
+        Invoice,
+        GeneralText
     }
 }

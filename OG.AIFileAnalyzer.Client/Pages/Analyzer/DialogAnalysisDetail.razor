@@ -1,0 +1,18 @@
+﻿@using OG.AIFileAnalyzer.Common.Consts
+
+<RadzenStack Gap="1.5rem">
+    <RadzenText TextStyle="TextStyle.H6">Document type: @AnalysisData.DocumentType.ToString()</RadzenText>
+    @if (AnalysisData.DocumentType == DocType.Invoice)
+    {
+        <InvoiceFieldsTable Fields="AnalysisData.Data.Select(x=> Tuple.Create(x.Value, x.Value))" />
+    }
+    else
+    {
+        <TextSummary Summaries="AnalysisData.Data" />
+    }
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenStack Orientation="Orientation.Horizontal">
+            <RadzenButton Text="Ok" Click="() => DialogService.Close(true)" Style="width: 80px;" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenStack>
