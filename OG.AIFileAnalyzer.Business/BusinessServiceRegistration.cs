@@ -8,12 +8,10 @@ namespace OG.AIFileAnalyzer.Business
 {
     public static class BusinessServiceRegistration
     {
-        public static void AddBusinessServices(this IServiceCollection services, IConfiguration configuration)
+        public static void AddBusinessServices(this IServiceCollection services)
         {
             services.AddScoped<IAnalyzerBusiness, AnalyzerBusiness>();
             services.AddScoped<IHistoricalBusiness, HistoricalBusiness>();
-
-            services.AddPersistenceServices(configuration);
         }
     }
 }

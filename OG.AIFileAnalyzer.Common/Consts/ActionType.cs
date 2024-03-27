@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OG.AIFileAnalyzer.Common.Consts
+{
+    public enum ActionType
+    {
+        DocumentUpload,
+        IA,
+        UserAction
+    }
+}
