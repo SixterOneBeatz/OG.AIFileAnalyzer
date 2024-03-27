@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OG.AIFileAnalyzer.Persistence.DataAccess.Contexts;
 
@@ -11,9 +12,11 @@ using OG.AIFileAnalyzer.Persistence.DataAccess.Contexts;
 namespace OG.AIFileAnalyzer.Persistence.DataAccess.Migrations
 {
     [DbContext(typeof(AIFileAnalyzerDbContext))]
-    partial class AIFileAnalyzerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240327213736_LogChanges")]
+    partial class LogChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

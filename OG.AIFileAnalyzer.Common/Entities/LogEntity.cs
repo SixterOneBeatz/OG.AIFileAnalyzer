@@ -2,11 +2,10 @@
 
 namespace OG.AIFileAnalyzer.Common.Entities
 {
-    public class LogEntity
+    public class LogEntity : BaseEntity
     {
-        public int Id { get; set; }
         public ActionType ActionType { get; set; }
         public string Description { get; set; }
-        public DateTime Date { get; set; }
+        public string Details { get; set; }
     }
 }

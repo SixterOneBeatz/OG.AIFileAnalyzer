@@ -1,5 +1,7 @@
 ﻿using OG.AIFileAnalyzer.Common.Consts;
 using OG.AIFileAnalyzer.Common.DTOs;
+using OG.AIFileAnalyzer.Common.Entities;
+using OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork;
 using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
 using System;
 using System.Collections.Generic;
@@ -9,9 +11,10 @@ using System.Threading.Tasks;
 
 namespace OG.AIFileAnalyzer.Business.Analyzer
 {
-    public class AnalyzerBusiness(IAzureAIService azureAIService) : IAnalyzerBusiness
+    public class AnalyzerBusiness(IAzureAIService azureAIService, IUnitOfWork unitOfWork) : IAnalyzerBusiness
     {
         private readonly IAzureAIService _azureAIService = azureAIService;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
         public async Task<AnalysisResponseDTO> Analyze(string base64Content)
         {
             AnalysisResponseDTO result;
@@ -39,6 +42,12 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
                     };
                 }
             }
+
+            await _unitOfWork.Repository<LogEntity>().AddEntity(new()
+            {
+                ActionType = ActionType.IA,
+                Description = "AI Analysis Runned"
+            });
 
             return result;
         }

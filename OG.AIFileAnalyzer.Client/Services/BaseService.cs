@@ -33,5 +33,10 @@ namespace OG.AIFileAnalyzer.Client.Services
                 return default;
             }
         }
+
+        public async Task PostAsync<U>(string endpoint, U body)
+        {
+            await _httpClient.PostAsJsonAsync(endpoint, body);
+        }
     }
 }

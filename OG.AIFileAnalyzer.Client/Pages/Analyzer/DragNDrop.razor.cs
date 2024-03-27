@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using OG.AIFileAnalyzer.Client.Services.Analyzer;
+using OG.AIFileAnalyzer.Client.Services.Historical;
 using OG.AIFileAnalyzer.Common.Consts;
 using OG.AIFileAnalyzer.Common.DTOs;
 using Radzen;
@@ -11,6 +12,9 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
     {
         [Inject]
         private IAnalyzerService AnalyzerService { get;set; }
+
+        [Inject]
+        private IHistoricalService HistoricalService { get;set; }
 
         [Inject]
         private DialogService DialogService { get;set; }
@@ -25,6 +29,13 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
                 await file.OpenReadStream().ReadAsync(buffer);
 
                 var base64String = Convert.ToBase64String(buffer);
+
+                await HistoricalService.Add(new()
+                {
+                    ActionType = ActionType.DocumentUpload,
+                    Description = "Document loaded",
+                    Details = base64String
+                });
 
                 var data = await AnalyzerService.Analyze(base64String);
 

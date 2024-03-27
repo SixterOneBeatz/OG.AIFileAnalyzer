@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OG.AIFileAnalyzer.Persistence.DataAccess.Contexts;
+using OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork;
 using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace OG.AIFileAnalyzer.Persistence
         {
             services.AddDbContext<AIFileAnalyzerDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("AIFileAnalyzerDB")));
             services.AddTransient<IAzureAIService, AzureAIService>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
         }
     }
 }
