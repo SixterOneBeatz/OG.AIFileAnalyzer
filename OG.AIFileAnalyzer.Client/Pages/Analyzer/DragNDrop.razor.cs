@@ -33,7 +33,6 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
                 {
                     ActionType = ActionType.DocumentUpload,
                     Description = "Document loaded",
-                    Details = base64String
                 });
 
                 var data = await AnalyzerService.Analyze(base64String);

@@ -7,5 +7,6 @@ namespace OG.AIFileAnalyzer.Business.Historical
     {
         Task<HistoricalResultDTO> GetHistorical(HistoricalFilterDTO filter);
         Task AddHistorical(LogEntity entity);
+        Task<AnalysisResponseDTO> GetAnalysisResult(string hash);
     }
 }

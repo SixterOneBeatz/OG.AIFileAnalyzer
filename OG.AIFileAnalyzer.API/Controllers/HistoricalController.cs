@@ -24,5 +24,12 @@ namespace OG.AIFileAnalyzer.API.Controllers
             await _historicalBusiness.AddHistorical(log);
             return Ok();
         }
+
+        [HttpGet("GetAnalysisResult/{hash}")]
+        public async Task<IActionResult> GetAnalysisResult(string hash)
+        {
+            var result = await _historicalBusiness.GetAnalysisResult(hash);
+            return Ok(result);
+        }
     }
 }

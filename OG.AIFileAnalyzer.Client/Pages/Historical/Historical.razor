@@ -13,10 +13,17 @@
                 PageSize="10"
                 PagerHorizontalAlign="HorizontalAlign.Center">
     <Columns>
-        <RadzenDataGridColumn TItem="LogEntity" Property="Id" Title="Id" Width="10%"/>
-        <RadzenDataGridColumn TItem="LogEntity" Property="ActionType" Title="Action" Width="15%"/>
-        <RadzenDataGridColumn TItem="LogEntity" Property="Date" Title="Date" Width="15%" />
-        <RadzenDataGridColumn TItem="LogEntity" Property="Description" Title="Description" Width="40%"/>
-        <RadzenDataGridColumn TItem="LogEntity" Property="Details" Title="Details" Width="20%" />
+        <RadzenDataGridColumn TItem="LogEntity" Property="Id" Title="Id" />
+        <RadzenDataGridColumn TItem="LogEntity" Property="ActionType" Title="Action" />
+        <RadzenDataGridColumn TItem="LogEntity" Property="Date" Title="Date" />
+        <RadzenDataGridColumn TItem="LogEntity" Property="Description" Title="Description" />
+        <RadzenDataGridColumn TItem="LogEntity" Title="Details">
+            <Template Context="log">
+                @if (log.ActionType == Common.Consts.ActionType.IA)
+                {
+                    <RadzenButton Icon="info" ButtonStyle="ButtonStyle.Info" Variant="Variant.Filled" Size="ButtonSize.Small" Click="@((args) => ShowAnalysisResult(log))" />
+                }
+            </Template>
+        </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>

@@ -7,8 +7,8 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
     {
         Task<AnalysisResponseDTO> Analyze(string base64Content);
 
-        Task<AnalysisResponseDTO> CheckForExistingAnalysis(byte[] bytes);
+        Task<AnalysisResponseDTO> CheckForExistingAnalysis(string hash);
 
-        Task SaveAnalysis(AnalysisResponseDTO file, byte[] bytes);
+        Task SaveAnalysis(AnalysisResponseDTO file, string hash);
     }
 }

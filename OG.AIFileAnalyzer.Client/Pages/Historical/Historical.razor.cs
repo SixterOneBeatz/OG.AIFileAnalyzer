@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
+using OG.AIFileAnalyzer.Client.Pages.Analyzer;
 using OG.AIFileAnalyzer.Client.Services.Historical;
+using OG.AIFileAnalyzer.Common.Consts;
+using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 using Radzen;
 using Radzen.Blazor;
+using System.Text.Json;
 
 namespace OG.AIFileAnalyzer.Client.Pages.Historical
 {
@@ -11,6 +15,9 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
 
         [Inject]
         private IHistoricalService HistoricalService { get; set; }
+
+        [Inject]
+        private DialogService DialogService { get; set; }
 
         private const int SKIP = 0;
         private const int TAKE = 15;
@@ -26,9 +33,8 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
 
             await HistoricalService.Add(new()
             {
-                ActionType = Common.Consts.ActionType.UserAction,
+                ActionType = ActionType.UserAction,
                 Description = "Enter to Historical Module",
-                Details = string.Empty
             });
         }
 
@@ -47,6 +53,20 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
             logs = query.Rows.AsODataEnumerable();
 
             isLoading = false;
+        }
+
+        async Task ShowAnalysisResult(LogEntity log)
+        {
+            FileDataDTO details = JsonSerializer.Deserialize<FileDataDTO>(log.Details);
+
+            var data = await HistoricalService.GetAnalysisResult(details.SHA256);
+
+            await DialogService.OpenAsync<DialogAnalysisDetail>("Analysis Result", new()
+            {
+                { "AnalysisData", data },
+            });
+
+            await Task.CompletedTask;
         }
     }
 }

@@ -14,7 +14,6 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
             {
                 ActionType = Common.Consts.ActionType.UserAction,
                 Description = "Enter to Analyzer Module",
-                Details = string.Empty
             });
 
             await base.OnInitializedAsync();

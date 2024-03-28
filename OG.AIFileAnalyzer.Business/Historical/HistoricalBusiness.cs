@@ -14,6 +14,24 @@ namespace OG.AIFileAnalyzer.Business.Historical
             await _unitOfWork.Complete();
         }
 
+        public async Task<AnalysisResponseDTO> GetAnalysisResult(string hash)
+        {
+            AnalysisResponseDTO result = null;
+
+            var file = (await _unitOfWork.Repository<FileEntity>().GetAsync(x => x.SHA256 == hash, [(y) => y.Anaysis])).FirstOrDefault();
+
+            if (file != null)
+            {
+                result = new()
+                {
+                    DocumentType = file.DocumentType,
+                    Data = file.Anaysis.ToDictionary(x => x.Key, x => x.Value),
+                };
+            }
+
+            return result;
+        }
+
         public async Task<List<LogEntity>> GetHistorical()
         {
             return await _unitOfWork.Repository<LogEntity>().GetAllAsync();

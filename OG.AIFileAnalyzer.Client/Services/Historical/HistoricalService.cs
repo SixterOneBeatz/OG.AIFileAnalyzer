@@ -10,6 +10,11 @@ namespace OG.AIFileAnalyzer.Client.Services.Historical
             await PostAsync("Historical/Add", log);
         }
 
+        public async Task<AnalysisResponseDTO> GetAnalysisResult(string hash)
+        {
+            return await GetAsync<AnalysisResponseDTO>($"Historical/GetAnalysisResult/{hash}");
+        }
+
         public async Task<HistoricalResultDTO> GetQueryable(HistoricalFilterDTO filter)
         {
             return await PostAsync<HistoricalResultDTO, HistoricalFilterDTO>("Historical/GetQueryable", filter);
