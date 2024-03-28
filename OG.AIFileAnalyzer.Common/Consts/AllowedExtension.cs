@@ -1,6 +1,6 @@
 ﻿namespace OG.AIFileAnalyzer.Common.Consts
 {
-    public enum AllowedFile
+    public enum AllowedExtension
     {
         PDF,
         JPEG,

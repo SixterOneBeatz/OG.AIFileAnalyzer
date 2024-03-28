@@ -18,6 +18,9 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
         [Inject]
         private DialogService DialogService { get; set; }
 
+        [Inject]
+        private NotificationService NotificationService { get; set; }
+
         bool IsLoading = false;
 
         async Task OnChange(InputFileChangeEventArgs e)
@@ -27,7 +30,7 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
             {
                 IsLoading = true;
 
-                if (file != null)
+                if (IsValidFile(file))
                 {
                     var buffer = new byte[file.Size];
                     await file.OpenReadStream().ReadAsync(buffer);
@@ -47,15 +50,32 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
                         { "AnalysisData", data },
                     });
                 }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Warning", Detail = "Invalid File!" });
+                }
             }
             catch (Exception)
             {
-
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "Please contact the administrator" });
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        bool IsValidFile(IBrowserFile file)
+        {
+            bool result = true;
+
+            var fileExtension = Path.GetExtension(file.Name).TrimStart('.').ToLower();
+
+            result &= file != null;
+            result &= Enum.TryParse(fileExtension, true, out AllowedExtension extension);
+            result &= Enum.IsDefined(typeof(AllowedExtension), extension);
+
+            return result;
         }
     }
 }
