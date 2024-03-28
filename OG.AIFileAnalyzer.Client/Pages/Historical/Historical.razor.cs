@@ -6,7 +6,9 @@ using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 using Radzen;
 using Radzen.Blazor;
+using System.IO;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OG.AIFileAnalyzer.Client.Pages.Historical
 {
@@ -18,6 +20,9 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
 
         [Inject]
         private DialogService DialogService { get; set; }
+
+        [Inject]
+        private NavigationManager NavigationManager { get; set; }
 
         private const int SKIP = 0;
         private const int TAKE = 15;
@@ -67,6 +72,19 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
             });
 
             await Task.CompletedTask;
+        }
+
+        async Task ExportToExcel()
+        {
+            var stream = await HistoricalService.GetReport();
+
+            var buffer = new byte[stream.Length];
+            await stream.ReadAsync(buffer, 0, buffer.Length);
+
+            var base64 = Convert.ToBase64String(buffer);
+            var url = $"data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64}";
+
+            NavigationManager.NavigateTo(url);
         }
     }
 }

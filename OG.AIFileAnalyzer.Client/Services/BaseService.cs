@@ -6,7 +6,7 @@ namespace OG.AIFileAnalyzer.Client.Services
     {
         private readonly HttpClient _httpClient = httpClient;
 
-        protected async Task<T> GetAsync<T>(string endpoint)
+        public async Task<T> GetAsync<T>(string endpoint)
         {
             var response = await _httpClient.GetAsync(endpoint);
 
@@ -37,6 +37,20 @@ namespace OG.AIFileAnalyzer.Client.Services
         public async Task PostAsync<U>(string endpoint, U body)
         {
             await _httpClient.PostAsJsonAsync(endpoint, body);
+        }
+
+        public async Task<Stream> GetAsync(string endpoint)
+        {
+            var response = await _httpClient.GetAsync(endpoint);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+                return default;
+            }
         }
     }
 }

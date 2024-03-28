@@ -1,12 +1,14 @@
 ﻿using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 using OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork;
+using OG.AIFileAnalyzer.Persistence.Services.Report;
 
 namespace OG.AIFileAnalyzer.Business.Historical
 {
-    public class HistoricalBusiness(IUnitOfWork unitOfWork) : IHistoricalBusiness
+    public class HistoricalBusiness(IUnitOfWork unitOfWork, IReportService reportService) : IHistoricalBusiness
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IReportService _reportService = reportService;
 
         public async Task AddHistorical(LogEntity entity)
         {
@@ -46,6 +48,12 @@ namespace OG.AIFileAnalyzer.Business.Historical
                 Rows = values,
                 TotalRows = total
             };
+        }
+
+        public async Task<MemoryStream> GetReport()
+        {
+            var logs = await GetHistorical();
+            return _reportService.ExportToExcel(logs);
         }
     }
 }

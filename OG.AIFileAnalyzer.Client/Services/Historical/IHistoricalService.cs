@@ -8,5 +8,6 @@ namespace OG.AIFileAnalyzer.Client.Services.Historical
         Task<HistoricalResultDTO> GetQueryable(HistoricalFilterDTO filter);
         Task Add(LogEntity log);
         Task<AnalysisResponseDTO> GetAnalysisResult(string hash);
+        Task<Stream> GetReport();
     }
 }

@@ -31,5 +31,12 @@ namespace OG.AIFileAnalyzer.API.Controllers
             var result = await _historicalBusiness.GetAnalysisResult(hash);
             return Ok(result);
         }
+
+        [HttpGet("GetReport")]
+        public async Task<IActionResult> GetReport()
+        {
+            var result = await _historicalBusiness.GetReport();
+            return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
     }
 }

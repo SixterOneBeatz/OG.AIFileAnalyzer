@@ -23,6 +23,15 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
             if (file != null)
             {
                 result = file;
+
+                await _unitOfWork.Repository<LogEntity>().AddEntity(new()
+                {
+                    ActionType = ActionType.IA,
+                    Description = "AI Analysis Recovered from database",
+                    Details = JsonSerializer.Serialize(new FileDataDTO { SHA256 = hash })
+                });
+                
+                await _unitOfWork.Complete();
             }
 
             else

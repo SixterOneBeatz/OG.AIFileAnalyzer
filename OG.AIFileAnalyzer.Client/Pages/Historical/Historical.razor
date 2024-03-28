@@ -2,6 +2,14 @@
 @using OG.AIFileAnalyzer.Client.Services.Historical
 @using OG.AIFileAnalyzer.Common.Entities
 
+<RadzenButton Icon="assignment_returned"
+              ButtonStyle="ButtonStyle.Success"
+              Variant="Variant.Filled"
+              Size="ButtonSize.Small"
+              Click="@((args) => ExportToExcel())"
+              Text="Export to Excel"
+              Style="margin-bottom: 1rem"/>
+
 <RadzenDataGrid @ref="logsGrid"
                 AllowPaging="true"
                 AllowSorting="true"
@@ -17,7 +25,7 @@
         <RadzenDataGridColumn TItem="LogEntity" Property="ActionType" Title="Action" />
         <RadzenDataGridColumn TItem="LogEntity" Property="Date" Title="Date" />
         <RadzenDataGridColumn TItem="LogEntity" Property="Description" Title="Description" />
-        <RadzenDataGridColumn TItem="LogEntity" Title="Details">
+        <RadzenDataGridColumn TItem="LogEntity" Title="Details" TextAlign="TextAlign.Center">
             <Template Context="log">
                 @if (log.ActionType == Common.Consts.ActionType.IA)
                 {

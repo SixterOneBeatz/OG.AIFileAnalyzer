@@ -19,5 +19,10 @@ namespace OG.AIFileAnalyzer.Client.Services.Historical
         {
             return await PostAsync<HistoricalResultDTO, HistoricalFilterDTO>("Historical/GetQueryable", filter);
         }
+
+        public async Task<Stream> GetReport()
+        {
+            return await GetAsync("Historical/GetReport");
+        }
     }
 }
