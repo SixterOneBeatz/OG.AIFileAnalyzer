@@ -12,6 +12,12 @@ namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
         private readonly DocumentAnalysisClient _documentAnalysisClient;
         private readonly FormRecognizerClient _formRecognizerClient;
         private readonly TextAnalyticsClient _textAnalyticsClient;
+
+        // Metadata: Describes the purpose of the constructor and its parameters
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AzureAIService"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration containing Azure AI service settings.</param>
         public AzureAIService(IConfiguration configuration)
         {
             string formRecognizerKey = configuration["AzureAI:formRecognizerKey"];
@@ -24,18 +30,21 @@ namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
             _textAnalyticsClient = new TextAnalyticsClient(new Uri(textAnalyzeEndPoint), new AzureKeyCredential(textAnalyzeKey));
         }
 
+        /// <inheritdoc/>
         public async Task<Dictionary<string, string>> RunInvoiceAnalysis(MemoryStream document)
         {
             AnalyzeDocumentOperation operation = await _documentAnalysisClient.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", document);
             AnalyzeResult result = operation.Value;
 
-            var docto = result.Documents.FirstOrDefault();
+            var documentFields = result.Documents.FirstOrDefault()?.Fields;
 
-            var keyValuePairs = docto.Fields.Select(x => new { x.Key, Value = x.Value.Content }).ToDictionary(x => x.Key, y => y.Value);
+            var keyValuePairs = documentFields?.Select(x => new { x.Key, Value = x.Value.Content }).ToDictionary(x => x.Key, y => y.Value)
+                                ?? new Dictionary<string, string>();
 
             return keyValuePairs;
         }
 
+        /// <inheritdoc/>
         public async Task<Dictionary<string, string>> RunTextAnalysis(MemoryStream document)
         {
             RecognizeContentOperation formOperation = await _formRecognizerClient.StartRecognizeContentAsync(document);

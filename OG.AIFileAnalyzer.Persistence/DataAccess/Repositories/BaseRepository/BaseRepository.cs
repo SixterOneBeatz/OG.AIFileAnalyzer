@@ -5,6 +5,10 @@ using System.Linq.Expressions;
 
 namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
 {
+    /// <summary>
+    /// Generic repository for database operations.
+    /// </summary>
+    /// <typeparam name="T">Type of entity for repository.</typeparam>
     public class BaseRepository<T>(AIFileAnalyzerDbContext context) : IBaseRepository<T> where T : BaseEntity
     {
         private readonly AIFileAnalyzerDbContext _context = context;

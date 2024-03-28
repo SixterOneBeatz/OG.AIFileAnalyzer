@@ -16,6 +16,7 @@ namespace OG.AIFileAnalyzer.Business.Historical
             await _unitOfWork.Complete();
         }
 
+        /// <inheritdoc/>
         public async Task<AnalysisResponseDTO> GetAnalysisResult(string hash)
         {
             AnalysisResponseDTO result = null;
@@ -34,11 +35,13 @@ namespace OG.AIFileAnalyzer.Business.Historical
             return result;
         }
 
+        /// <inheritdoc/>
         public async Task<List<LogEntity>> GetHistorical()
         {
             return await _unitOfWork.Repository<LogEntity>().GetAllAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<HistoricalResultDTO> GetHistorical(HistoricalFilterDTO filter)
         {
             var (values, total) = await _unitOfWork.Repository<LogEntity>().GetAsync(filter.Skip, filter.Take);
@@ -50,6 +53,7 @@ namespace OG.AIFileAnalyzer.Business.Historical
             };
         }
 
+        /// <inheritdoc/>
         public async Task<MemoryStream> GetReport()
         {
             var logs = await GetHistorical();

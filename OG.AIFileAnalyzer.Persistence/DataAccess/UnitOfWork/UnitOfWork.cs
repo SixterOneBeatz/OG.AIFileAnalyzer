@@ -5,21 +5,32 @@ using System.Collections;
 
 namespace OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork
 {
+    /// <summary>
+    /// Implementation of the unit of work pattern for coordinating repository access and database transactions.
+    /// </summary>
+    /// <remarks>
+    /// Constructs an instance of UnitOfWork with the specified database context.
+    /// </remarks>
+    /// <param name="context">The database context.</param>
     public class UnitOfWork(AIFileAnalyzerDbContext context) : IUnitOfWork
     {
         private readonly AIFileAnalyzerDbContext _context = context;
 
         private Hashtable _repositories;
+
+        /// <inheritdoc/>
         public async Task<int> Complete()
         {
             return await _context.SaveChangesAsync();
         }
 
+        /// <inheritdoc/>
         public void Dispose() => _context.Dispose();
 
+        /// <inheritdoc/>
         public IBaseRepository<TEntity> Repository<TEntity>() where TEntity : BaseEntity
         {
-            _repositories ??= [];
+            _repositories ??= new Hashtable();
 
             var type = typeof(TEntity).Name;
 
@@ -33,6 +44,9 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork
             return (IBaseRepository<TEntity>)_repositories[type];
         }
 
+        /// <summary>
+        /// Finalizes an instance of the UnitOfWork class.
+        /// </summary>
         ~UnitOfWork() => Dispose();
     }
 }

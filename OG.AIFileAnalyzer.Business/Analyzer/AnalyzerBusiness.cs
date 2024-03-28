@@ -12,6 +12,8 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
     {
         private readonly IAzureAIService _azureAIService = azureAIService;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+
+        /// <inheritdoc/>
         public async Task<AnalysisResponseDTO> Analyze(string base64Content)
         {
             AnalysisResponseDTO result;
@@ -75,6 +77,7 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
             return result;
         }
 
+        /// <inheritdoc/>
         public async Task<AnalysisResponseDTO> CheckForExistingAnalysis(string hash)
         {
             AnalysisResponseDTO result = null;
@@ -93,6 +96,7 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
             return result;
         }
 
+        /// <inheritdoc/>
         public async Task SaveAnalysis(AnalysisResponseDTO file, string hash)
         {
             if (file != null)

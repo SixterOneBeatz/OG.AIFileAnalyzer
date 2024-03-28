@@ -12,55 +12,99 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OG.AIFileAnalyzer.Client.Pages.Historical
 {
-    public partial class Historical
+    /// <summary>
+    /// Partial class representing the Historical component.
+    /// </summary>
+    public partial class Historical : ComponentBase
     {
-
+        /// <summary>
+        /// Injected instance of the historical service.
+        /// </summary>
         [Inject]
         private IHistoricalService HistoricalService { get; set; }
 
+        /// <summary>
+        /// Injected instance of the dialog service.
+        /// </summary>
         [Inject]
         private DialogService DialogService { get; set; }
 
+        /// <summary>
+        /// Injected instance of the navigation manager.
+        /// </summary>
         [Inject]
         private NavigationManager NavigationManager { get; set; }
 
+        /// <summary>
+        /// Represents the number of records to skip when loading data.
+        /// </summary>
         private const int SKIP = 0;
+
+        /// <summary>
+        /// Represents the number of records to take when loading data.
+        /// </summary>
         private const int TAKE = 15;
 
-        ODataEnumerable<LogEntity> logs;
-        RadzenDataGrid<LogEntity> logsGrid;
-        bool isLoading;
-        int count;
+        /// <summary>
+        /// Enumerable collection of log entities.
+        /// </summary>
+        private ODataEnumerable<LogEntity> logs;
 
+        /// <summary>
+        /// Data grid component for displaying log entities.
+        /// </summary>
+        private RadzenDataGrid<LogEntity> logsGrid;
+
+        /// <summary>
+        /// Indicates whether data is being loaded.
+        /// </summary>
+        private bool isLoading;
+
+        /// <summary>
+        /// The total count of log entities.
+        /// </summary>
+        private int count;
+
+        /// <summary>
+        /// Overrides the base method to perform initialization asynchronously.
+        /// </summary>
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
-            await HistoricalService.Add(new()
+            // Adds an entry to historical data indicating user action upon entering the Historical module.
+            await HistoricalService.Add(new LogEntity
             {
                 ActionType = ActionType.UserAction,
                 Description = "Enter to Historical Module",
             });
         }
 
-        async Task LoadData(LoadDataArgs args)
+        /// <summary>
+        /// Loads data based on the provided arguments.
+        /// </summary>
+        /// <param name="args">The arguments for loading data.</param>
+        private async Task LoadData(LoadDataArgs args)
         {
             isLoading = true;
 
-            var query = await HistoricalService.GetQueryable(new()
+            var query = await HistoricalService.GetQueryable(new HistoricalFilterDTO
             {
                 Skip = args.Skip ?? SKIP,
                 Take = args.Top ?? TAKE,
             });
 
             count = query.TotalRows;
-
             logs = query.Rows.AsODataEnumerable();
 
             isLoading = false;
         }
 
-        async Task ShowAnalysisResult(LogEntity log)
+        /// <summary>
+        /// Shows the analysis result for the specified log entity.
+        /// </summary>
+        /// <param name="log">The log entity for which to show the analysis result.</param>
+        private async Task ShowAnalysisResult(LogEntity log)
         {
             FileDataDTO details = JsonSerializer.Deserialize<FileDataDTO>(log.Details);
 
@@ -70,17 +114,17 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
             {
                 { "AnalysisData", data },
             });
-
-            await Task.CompletedTask;
         }
 
-        async Task ExportToExcel()
+        /// <summary>
+        /// Exports data to Excel.
+        /// </summary>
+        private async Task ExportToExcel()
         {
             var stream = await HistoricalService.GetReport();
-
             var buffer = new byte[stream.Length];
-            await stream.ReadAsync(buffer, 0, buffer.Length);
 
+            await stream.ReadAsync(buffer, 0, buffer.Length);
             var base64 = Convert.ToBase64String(buffer);
             var url = $"data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64}";
 
