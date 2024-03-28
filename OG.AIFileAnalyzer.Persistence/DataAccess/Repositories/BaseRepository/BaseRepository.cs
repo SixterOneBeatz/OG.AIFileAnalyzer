@@ -30,5 +30,18 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
         {
             return await _context.Set<T>().Where(predicate).ToListAsync();
         }
+
+        public async Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate = null, List<Expression<Func<T, object>>> includes = null)
+        {
+
+            IQueryable<T> query = _context.Set<T>();
+            
+            if (includes != null) query = includes.Aggregate(query, (current, include) => current.Include(include));
+
+            if (predicate != null) query = query.Where(predicate);
+
+
+            return await query.ToListAsync();
+        }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OG.AIFileAnalyzer.Persistence.DataAccess.Contexts;
 
@@ -11,9 +12,11 @@ using OG.AIFileAnalyzer.Persistence.DataAccess.Contexts;
 namespace OG.AIFileAnalyzer.Persistence.DataAccess.Migrations
 {
     [DbContext(typeof(AIFileAnalyzerDbContext))]
-    partial class AIFileAnalyzerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240328162943_FileEntities")]
+    partial class FileEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,6 +36,9 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("FileEntityId")
+                        .HasColumnType("int");
+
                     b.Property<int>("FileId")
                         .HasColumnType("int");
 
@@ -44,7 +50,7 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FileId");
+                    b.HasIndex("FileEntityId");
 
                     b.ToTable("FileAnalyses");
                 });
@@ -59,9 +65,6 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Migrations
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("DocumentType")
-                        .HasColumnType("int");
 
                     b.Property<string>("SHA256")
                         .HasColumnType("nvarchar(450)");
@@ -102,13 +105,9 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Migrations
 
             modelBuilder.Entity("OG.AIFileAnalyzer.Common.Entities.FileAnaysisEntity", b =>
                 {
-                    b.HasOne("OG.AIFileAnalyzer.Common.Entities.FileEntity", "File")
+                    b.HasOne("OG.AIFileAnalyzer.Common.Entities.FileEntity", null)
                         .WithMany("Anaysis")
-                        .HasForeignKey("FileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("File");
+                        .HasForeignKey("FileEntityId");
                 });
 
             modelBuilder.Entity("OG.AIFileAnalyzer.Common.Entities.FileEntity", b =>

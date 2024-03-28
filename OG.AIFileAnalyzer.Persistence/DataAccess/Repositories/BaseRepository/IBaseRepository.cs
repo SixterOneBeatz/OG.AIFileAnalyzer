@@ -7,6 +7,7 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
     {
         Task<List<T>> GetAllAsync();
         Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate);
+        Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate = null, List<Expression<Func<T, object>>> includes = null);
         Task<(List<T> values, int total)> GetAsync(int skip, int take);
         Task AddEntity(T entity);
     }
