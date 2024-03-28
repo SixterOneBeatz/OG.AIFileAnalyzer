@@ -34,3 +34,10 @@
     opacity: 0;
     cursor: pointer;
 }
+
+img {
+    width: 100%; 
+    height: auto;
+    max-height: 80vh;
+    display: block;
+}

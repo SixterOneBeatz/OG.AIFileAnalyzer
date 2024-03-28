@@ -1,4 +1,11 @@
-﻿<div class="file-drop-zone">
-    <InputFile id="fileInput" OnChange="@OnChange" />
-    <label for="fileInput" class="file-label">Drag & Drop files here or click to browse</label>
-</div>
+﻿@if (IsLoading)
+{
+    <img src="/matrix-elmo.gif" alt="Loading..." />
+}
+else
+{
+    <div class="file-drop-zone">
+        <InputFile id="fileInput" OnChange="@OnChange" />
+        <label for="fileInput" class="file-label">Drag & Drop files here or click to browse</label>
+    </div>
+}

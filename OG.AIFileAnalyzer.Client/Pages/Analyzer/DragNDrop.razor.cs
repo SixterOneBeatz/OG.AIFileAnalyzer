@@ -18,29 +18,43 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
         [Inject]
         private DialogService DialogService { get; set; }
 
+        bool IsLoading = false;
+
         async Task OnChange(InputFileChangeEventArgs e)
         {
             var file = e.File;
-
-            if (file != null)
+            try
             {
-                var buffer = new byte[file.Size];
-                await file.OpenReadStream().ReadAsync(buffer);
+                IsLoading = true;
 
-                var base64String = Convert.ToBase64String(buffer);
-
-                await HistoricalService.Add(new()
+                if (file != null)
                 {
-                    ActionType = ActionType.DocumentUpload,
-                    Description = "Document loaded",
-                });
+                    var buffer = new byte[file.Size];
+                    await file.OpenReadStream().ReadAsync(buffer);
 
-                var data = await AnalyzerService.Analyze(base64String);
+                    var base64String = Convert.ToBase64String(buffer);
 
-                await DialogService.OpenAsync<DialogAnalysisDetail>("Analysis Result", new()
-                {
-                    { "AnalysisData", data },
-                });
+                    await HistoricalService.Add(new()
+                    {
+                        ActionType = ActionType.DocumentUpload,
+                        Description = "Document loaded",
+                    });
+
+                    var data = await AnalyzerService.Analyze(base64String);
+
+                    await DialogService.OpenAsync<DialogAnalysisDetail>("Analysis Result", new()
+                    {
+                        { "AnalysisData", data },
+                    });
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
     }
