@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using OG.AIFileAnalyzer.Client.Services.Historical;
 using OG.AIFileAnalyzer.Common.Entities;
-using Radzen.Blazor;
 using Radzen;
-using System.Linq;
-using OG.AIFileAnalyzer.Common.DTOs;
+using Radzen.Blazor;
 
 namespace OG.AIFileAnalyzer.Client.Pages.Historical
 {

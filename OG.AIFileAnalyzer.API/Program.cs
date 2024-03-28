@@ -13,7 +13,7 @@ builder.Services.AddBusinessServices();
 builder.Services.AddPersistenceServices(configuration);
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("CORS_POLICY", policy => 
+    options.AddPolicy("CORS_POLICY", policy =>
     policy.WithOrigins(configuration["frontendUrl"])
           .AllowAnyMethod()
           .AllowAnyHeader());

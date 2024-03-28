@@ -1,6 +1,5 @@
 ﻿using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
-using System.Net.Http;
 
 namespace OG.AIFileAnalyzer.Client.Services.Historical
 {

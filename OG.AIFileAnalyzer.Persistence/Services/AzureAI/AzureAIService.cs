@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Azure;
+﻿using Azure;
 using Azure.AI.FormRecognizer;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.AI.FormRecognizer.Models;
 using Azure.AI.TextAnalytics;
 using Microsoft.Extensions.Configuration;
-using OG.AIFileAnalyzer.Common.DTOs;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
 {
@@ -34,7 +24,7 @@ namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
             _textAnalyticsClient = new TextAnalyticsClient(new Uri(textAnalyzeEndPoint), new AzureKeyCredential(textAnalyzeKey));
         }
 
-        public async Task<Dictionary<string,string>> RunInvoiceAnalysis(MemoryStream document)
+        public async Task<Dictionary<string, string>> RunInvoiceAnalysis(MemoryStream document)
         {
             AnalyzeDocumentOperation operation = await _documentAnalysisClient.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", document);
             AnalyzeResult result = operation.Value;

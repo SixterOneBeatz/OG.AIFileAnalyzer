@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OG.AIFileAnalyzer.Business.Analyzer;
 
 namespace OG.AIFileAnalyzer.API.Controllers

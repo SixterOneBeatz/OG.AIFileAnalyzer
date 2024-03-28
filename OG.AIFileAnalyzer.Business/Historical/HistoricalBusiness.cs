@@ -1,12 +1,6 @@
-﻿using OG.AIFileAnalyzer.Business.Analyzer;
-using OG.AIFileAnalyzer.Common.DTOs;
+﻿using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 using OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OG.AIFileAnalyzer.Business.Historical
 {

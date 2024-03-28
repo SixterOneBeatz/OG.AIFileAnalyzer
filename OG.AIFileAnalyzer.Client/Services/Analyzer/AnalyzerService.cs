@@ -1,6 +1,4 @@
 ﻿using OG.AIFileAnalyzer.Common.DTOs;
-using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace OG.AIFileAnalyzer.Client.Services.Analyzer
 {

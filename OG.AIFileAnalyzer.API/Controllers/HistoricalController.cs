@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OG.AIFileAnalyzer.Business.Historical;
 using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;

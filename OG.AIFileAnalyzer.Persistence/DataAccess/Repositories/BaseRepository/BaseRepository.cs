@@ -1,12 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OG.AIFileAnalyzer.Common.Entities;
 using OG.AIFileAnalyzer.Persistence.DataAccess.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
 {
@@ -28,7 +23,7 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
         {
             var query = _context.Set<T>();
 
-            return (await query.Skip(skip).Take(take).ToListAsync(), query.Count());  
+            return (await query.Skip(skip).Take(take).ToListAsync(), query.Count());
         }
 
         public async Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate)

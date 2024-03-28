@@ -4,11 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using OG.AIFileAnalyzer.Persistence.DataAccess.Contexts;
 using OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork;
 using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OG.AIFileAnalyzer.Persistence
 {

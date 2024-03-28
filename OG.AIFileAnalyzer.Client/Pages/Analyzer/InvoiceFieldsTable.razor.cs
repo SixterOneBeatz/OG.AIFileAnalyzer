@@ -4,7 +4,7 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
 {
     public partial class InvoiceFieldsTable
     {
-        [Parameter] 
-        public IEnumerable<Tuple<string,string>> Fields { get; set; }
+        [Parameter]
+        public IEnumerable<Tuple<string, string>> Fields { get; set; }
     }
 }

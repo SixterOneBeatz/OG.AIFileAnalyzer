@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.Forms;
 using OG.AIFileAnalyzer.Client.Services.Analyzer;
 using OG.AIFileAnalyzer.Client.Services.Historical;
 using OG.AIFileAnalyzer.Common.Consts;
-using OG.AIFileAnalyzer.Common.DTOs;
 using Radzen;
 
 namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
@@ -11,13 +10,13 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
     public partial class DragNDrop
     {
         [Inject]
-        private IAnalyzerService AnalyzerService { get;set; }
+        private IAnalyzerService AnalyzerService { get; set; }
 
         [Inject]
-        private IHistoricalService HistoricalService { get;set; }
+        private IHistoricalService HistoricalService { get; set; }
 
         [Inject]
-        private DialogService DialogService { get;set; }
+        private DialogService DialogService { get; set; }
 
         async Task OnChange(InputFileChangeEventArgs e)
         {
