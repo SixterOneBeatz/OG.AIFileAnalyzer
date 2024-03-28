@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OG.AIFileAnalyzer.Common", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OG.AIFileAnalyzer.Persistence", "OG.AIFileAnalyzer.Persistence\OG.AIFileAnalyzer.Persistence.csproj", "{9551FB46-06F5-442A-ADD1-392B78661424}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OG.AIFileAnalyzer.Tests", "OG.AIFileAnalyzer.Tests\OG.AIFileAnalyzer.Tests.csproj", "{EABC0E0E-AA21-4130-954C-512FE1D0FAE9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{9551FB46-06F5-442A-ADD1-392B78661424}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9551FB46-06F5-442A-ADD1-392B78661424}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9551FB46-06F5-442A-ADD1-392B78661424}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EABC0E0E-AA21-4130-954C-512FE1D0FAE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EABC0E0E-AA21-4130-954C-512FE1D0FAE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EABC0E0E-AA21-4130-954C-512FE1D0FAE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EABC0E0E-AA21-4130-954C-512FE1D0FAE9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
