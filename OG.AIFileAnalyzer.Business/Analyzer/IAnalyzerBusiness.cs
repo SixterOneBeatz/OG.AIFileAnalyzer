@@ -1,5 +1,4 @@
 ﻿using OG.AIFileAnalyzer.Common.DTOs;
-using OG.AIFileAnalyzer.Common.Entities;
 
 namespace OG.AIFileAnalyzer.Business.Analyzer
 {

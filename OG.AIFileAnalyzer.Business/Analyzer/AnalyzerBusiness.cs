@@ -32,7 +32,7 @@ namespace OG.AIFileAnalyzer.Business.Analyzer
                     Description = "AI Analysis Recovered from database",
                     Details = JsonSerializer.Serialize(new FileDataDTO { SHA256 = hash })
                 });
-                
+
                 await _unitOfWork.Complete();
             }
 

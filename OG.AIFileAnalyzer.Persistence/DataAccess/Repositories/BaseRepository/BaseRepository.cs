@@ -39,7 +39,7 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
         {
 
             IQueryable<T> query = _context.Set<T>();
-            
+
             if (includes != null) query = includes.Aggregate(query, (current, include) => current.Include(include));
 
             if (predicate != null) query = query.Where(predicate);

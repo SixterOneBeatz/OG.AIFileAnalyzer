@@ -6,9 +6,7 @@ using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 using Radzen;
 using Radzen.Blazor;
-using System.IO;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OG.AIFileAnalyzer.Client.Pages.Historical
 {
