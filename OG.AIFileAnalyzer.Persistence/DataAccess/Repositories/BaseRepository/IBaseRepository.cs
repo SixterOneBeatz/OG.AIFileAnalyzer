@@ -35,8 +35,9 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
         /// </summary>
         /// <param name="skip">The number of entities to skip.</param>
         /// <param name="take">The number of entities to take.</param>
+        /// <param name="predicate"> Expression to filter data </param>
         /// <returns>A task representing the asynchronous operation that returns a tuple containing a list of entities and the total count.</returns>
-        Task<(List<T> values, int total)> GetAsync(int skip, int take);
+        Task<(List<T> values, int total)> GetAsync(int skip, int take, Expression<Func<T, bool>> predicate = null);
 
         /// <summary>
         /// Adds an entity asynchronously.

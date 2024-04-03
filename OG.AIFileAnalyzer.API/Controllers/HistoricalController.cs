@@ -58,10 +58,10 @@ namespace OG.AIFileAnalyzer.API.Controllers
         /// Retrieves a report containing historical data.
         /// </summary>
         /// <returns>The action result containing the report as a file.</returns>
-        [HttpGet("GetReport")]
-        public async Task<IActionResult> GetReport()
+        [HttpPost("GetReport")]
+        public async Task<IActionResult> GetReport(HistoricalFilterDTO filter)
         {
-            var result = await _historicalBusiness.GetReport();
+            var result = await _historicalBusiness.GetReport(filter);
             return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
     }

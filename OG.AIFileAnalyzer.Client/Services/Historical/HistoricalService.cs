@@ -24,9 +24,9 @@ namespace OG.AIFileAnalyzer.Client.Services.Historical
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> GetReport()
+        public async Task<Stream> GetReport(HistoricalFilterDTO filter)
         {
-            return await GetAsync("Historical/GetReport");
+            return await PostStreamAsync("Historical/GetReport", filter);
         }
     }
 }

@@ -32,7 +32,8 @@ namespace OG.AIFileAnalyzer.Business.Historical
         /// <summary>
         /// Retrieves a report as a memory stream.
         /// </summary>
+        /// <param name="filter">Represents params to filter data</param>
         /// <returns>A task representing the asynchronous operation. The task result contains the report as a memory stream.</returns>
-        Task<MemoryStream> GetReport();
+        Task<MemoryStream> GetReport(HistoricalFilterDTO filter);
     }
 }

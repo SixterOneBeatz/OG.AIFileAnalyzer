@@ -34,6 +34,18 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
         private NavigationManager NavigationManager { get; set; }
 
         /// <summary>
+        /// Injected instance of the tooltip service.
+        /// </summary>
+        [Inject]
+        private TooltipService TooltipService { get; set; }
+
+        /// <summary>
+        /// Injected instance of the notification service.
+        /// </summary>
+        [Inject]
+        private NotificationService NotificationService { get; set; }
+
+        /// <summary>
         /// Represents the number of records to skip when loading data.
         /// </summary>
         private const int SKIP = 0;
@@ -46,22 +58,38 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
         /// <summary>
         /// Enumerable collection of log entities.
         /// </summary>
-        private ODataEnumerable<LogEntity> logs;
+        private ODataEnumerable<LogEntity> Logs;
 
         /// <summary>
         /// Data grid component for displaying log entities.
         /// </summary>
-        private RadzenDataGrid<LogEntity> logsGrid;
+        private RadzenDataGrid<LogEntity> LogsGrid;
 
         /// <summary>
         /// Indicates whether data is being loaded.
         /// </summary>
-        private bool isLoading;
+        private bool IsLoading;
 
         /// <summary>
         /// The total count of log entities.
         /// </summary>
-        private int count;
+        private int Count;
+
+        /// <summary>
+        /// Default tooltip options
+        /// </summary>
+        private readonly TooltipOptions TooltipOptions = new()
+        {
+            Position = TooltipPosition.Left, 
+            Duration = null
+        };
+
+        /// <summary>
+        /// Action types for dropdown
+        /// </summary>
+        private readonly IEnumerable<ActionType> ActionTypes = Enum.GetValues(typeof(ActionType)).Cast<ActionType>();
+
+        private HistoricalFilterDTO Filter = new();
 
         /// <summary>
         /// Overrides the base method to perform initialization asynchronously.
@@ -84,18 +112,17 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
         /// <param name="args">The arguments for loading data.</param>
         private async Task LoadData(LoadDataArgs args)
         {
-            isLoading = true;
+            IsLoading = true;
+            
+            Filter.Skip = args.Skip ?? SKIP;
+            Filter.Take = args.Top ?? TAKE;
+            
+            var query = await HistoricalService.GetQueryable(Filter);
 
-            var query = await HistoricalService.GetQueryable(new HistoricalFilterDTO
-            {
-                Skip = args.Skip ?? SKIP,
-                Take = args.Top ?? TAKE,
-            });
+            Count = query.TotalRows;
+            Logs = query.Rows.AsODataEnumerable();
 
-            count = query.TotalRows;
-            logs = query.Rows.AsODataEnumerable();
-
-            isLoading = false;
+            IsLoading = false;
         }
 
         /// <summary>
@@ -119,14 +146,51 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
         /// </summary>
         private async Task ExportToExcel()
         {
-            var stream = await HistoricalService.GetReport();
-            var buffer = new byte[stream.Length];
+            if (IsValidFilter())
+            {
+                var stream = await HistoricalService.GetReport(Filter);
+                var buffer = new byte[stream.Length];
 
-            await stream.ReadAsync(buffer, 0, buffer.Length);
-            var base64 = Convert.ToBase64String(buffer);
-            var url = $"data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64}";
+                await stream.ReadAsync(buffer, 0, buffer.Length);
+                var base64 = Convert.ToBase64String(buffer);
+                var url = $"data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64}";
 
-            NavigationManager.NavigateTo(url);
+                NavigationManager.NavigateTo(url);
+            }
+        }
+
+        /// <summary>
+        /// Triggers search for data
+        /// </summary>
+        /// <returns></returns>
+        private async Task Search()
+        {
+            if (IsValidFilter())
+            {
+                await LogsGrid.Reload();
+            }
+        }
+
+        /// <summary>
+        /// Clears the filter value
+        /// </summary>
+        private void Clean()
+        {
+            Filter = new();
+        }
+
+        /// <summary>
+        /// Validates if value of filter is valid
+        /// </summary>
+        /// <returns></returns>
+        private bool IsValidFilter()
+        {
+            bool isValid = (Filter.DateStart ?? DateTime.MinValue) <= (Filter.DateEnd ?? DateTime.MaxValue);
+            if (!isValid)
+            {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Warning", Detail = "Invalid date range!" });
+            }
+            return isValid;
         }
     }
 }

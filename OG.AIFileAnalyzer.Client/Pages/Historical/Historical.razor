@@ -1,35 +1,93 @@
 ﻿@page "/Historical"
 @using OG.AIFileAnalyzer.Client.Services.Historical
+@using OG.AIFileAnalyzer.Common.Consts
 @using OG.AIFileAnalyzer.Common.Entities
 
-<RadzenButton Icon="assignment_returned"
-              ButtonStyle="ButtonStyle.Success"
-              Variant="Variant.Filled"
-              Size="ButtonSize.Small"
-              Click="@((args) => ExportToExcel())"
-              Text="Export to Excel"
-              Style="margin-bottom: 1rem"/>
+<div class="filter-container">
+    <RadzenDropDown Data=@ActionTypes Placeholder="Action..." Class="filter-input" @bind-Value=@Filter.Action>
+        <Template>
+            @Enum.GetName(typeof(ActionType), context)
+        </Template>
+    </RadzenDropDown>
 
-<RadzenDataGrid @ref="logsGrid"
+    <RadzenTextBox Placeholder="Description..." Class="filter-input" @bind-Value=@Filter.Description/>
+
+    <RadzenDatePicker @bind-Value=@Filter.DateStart
+                      ShowTime="true"
+                      ShowSeconds="true"
+                      HoursStep="1"
+                      MinutesStep="1"
+                      SecondsStep="10"
+                      DateFormat="dd/MM/yyyy HH:mm"
+                      Class="filter-input"
+                      Placeholder="From..."/>
+    <RadzenDatePicker @bind-Value=@Filter.DateEnd
+                      ShowTime="true"
+                      ShowSeconds="true"
+                      HoursStep="1"
+                      MinutesStep="1"
+                      SecondsStep="10"
+                      DateFormat="dd/MM/yyyy HH:mm"
+                      Class="filter-input"
+                      Placeholder="To..." />
+
+    <div class="button-container">
+        <RadzenButton Icon="search"
+                      ButtonStyle="ButtonStyle.Light"
+                      Variant="Variant.Filled"
+                      Size="ButtonSize.Medium"
+                      Class="filter-button"
+                      Click="@Search"
+                      MouseLeave="@(args => TooltipService.Close())"
+                      MouseEnter="@(args => TooltipService.Open(args, "Search...", TooltipOptions))" />
+        <RadzenButton Icon="clear"
+                      ButtonStyle="ButtonStyle.Light"
+                      Variant="Variant.Filled"
+                      Size="ButtonSize.Medium"
+                      Class="filter-button"
+                      Click="@Clean"
+                      MouseLeave="@(args => TooltipService.Close())"
+                      MouseEnter="@(args => TooltipService.Open(args, "Clear filter...", TooltipOptions))" />
+        <RadzenButton Icon="dataset"
+                      ButtonStyle="ButtonStyle.Success"
+                      Variant="Variant.Filled"
+                      Size="ButtonSize.Medium"
+                      Click="@ExportToExcel"
+                      Class="filter-button"
+                      MouseLeave="@(args => TooltipService.Close())"
+                      MouseEnter="@(args => TooltipService.Open(args, "Export to excel", TooltipOptions))" />
+    </div>
+</div>
+
+<RadzenDataGrid @ref="LogsGrid"
                 AllowPaging="true"
-                AllowSorting="true"
-                IsLoading="@isLoading"
-                Data="@(logs)"
+                IsLoading="@IsLoading"
+                Data="@(Logs)"
                 TItem="LogEntity"
-                Count="@count"
+                Count="@Count"
                 LoadData="@LoadData"
                 PageSize="10"
                 PagerHorizontalAlign="HorizontalAlign.Center">
     <Columns>
         <RadzenDataGridColumn TItem="LogEntity" Property="Id" Title="Id" />
         <RadzenDataGridColumn TItem="LogEntity" Property="ActionType" Title="Action" />
-        <RadzenDataGridColumn TItem="LogEntity" Property="Date" Title="Date" />
+        <RadzenDataGridColumn TItem="LogEntity" Property="Date" Title="Date">
+            <Template Context="log">
+                @($"{log.Date:dd/MM/yyyy HH:mm}")
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="LogEntity" Property="Description" Title="Description" />
         <RadzenDataGridColumn TItem="LogEntity" Title="Details" TextAlign="TextAlign.Center">
             <Template Context="log">
                 @if (log.ActionType == Common.Consts.ActionType.IA)
                 {
-                    <RadzenButton Icon="info" ButtonStyle="ButtonStyle.Info" Variant="Variant.Filled" Size="ButtonSize.Small" Click="@((args) => ShowAnalysisResult(log))" />
+                    <RadzenButton Icon="info"
+                                  ButtonStyle="ButtonStyle.Info"
+                                  Variant="Variant.Filled"
+                                  Size="ButtonSize.Small"
+                                  Click="@((args) => ShowAnalysisResult(log))"
+                                  MouseLeave="@(args => TooltipService.Close())"
+                                  MouseEnter="@(args => TooltipService.Open(args, "View info", TooltipOptions))" />
                 }
             </Template>
         </RadzenDataGridColumn>

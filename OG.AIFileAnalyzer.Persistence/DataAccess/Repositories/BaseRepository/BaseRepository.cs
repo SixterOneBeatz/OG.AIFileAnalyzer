@@ -23,9 +23,11 @@ namespace OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository
             return await _context.Set<T>().ToListAsync();
         }
 
-        public async Task<(List<T> values, int total)> GetAsync(int skip, int take)
+        public async Task<(List<T> values, int total)> GetAsync(int skip, int take, Expression<Func<T, bool>> predicate = null)
         {
-            var query = _context.Set<T>();
+            IQueryable<T> query = _context.Set<T>();
+
+            if (predicate != null) query = query.Where(predicate);
 
             return (await query.Skip(skip).Take(take).ToListAsync(), query.Count());
         }

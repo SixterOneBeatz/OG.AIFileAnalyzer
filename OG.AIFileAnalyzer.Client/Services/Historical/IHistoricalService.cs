@@ -32,7 +32,8 @@ namespace OG.AIFileAnalyzer.Client.Services.Historical
         /// <summary>
         /// Retrieves a report as a stream.
         /// </summary>
+        /// <param name="filter">The filter to apply to the historical data.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains the report stream.</returns>
-        Task<Stream> GetReport();
+        Task<Stream> GetReport(HistoricalFilterDTO filter);
     }
 }

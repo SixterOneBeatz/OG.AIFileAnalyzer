@@ -1,7 +1,9 @@
-﻿using OG.AIFileAnalyzer.Common.DTOs;
+﻿using OG.AIFileAnalyzer.Common.Consts;
+using OG.AIFileAnalyzer.Common.DTOs;
 using OG.AIFileAnalyzer.Common.Entities;
 using OG.AIFileAnalyzer.Persistence.DataAccess.UnitOfWork;
 using OG.AIFileAnalyzer.Persistence.Services.Report;
+using System.Linq.Expressions;
 
 namespace OG.AIFileAnalyzer.Business.Historical
 {
@@ -44,7 +46,13 @@ namespace OG.AIFileAnalyzer.Business.Historical
         /// <inheritdoc/>
         public async Task<HistoricalResultDTO> GetHistorical(HistoricalFilterDTO filter)
         {
-            var (values, total) = await _unitOfWork.Repository<LogEntity>().GetAsync(filter.Skip, filter.Take);
+            Expression<Func<LogEntity, bool>> filterExpression = entity =>
+                entity.ActionType == (filter.Action != ActionType.All ? filter.Action : entity.ActionType) &&
+                entity.Date >= (filter.DateStart ?? entity.Date) &&
+                entity.Date <= (filter.DateEnd ?? entity.Date) &&
+                entity.Description.Contains(!string.IsNullOrEmpty(filter.Description) ? filter.Description : entity.Description);
+            
+            var (values, total) = await _unitOfWork.Repository<LogEntity>().GetAsync(filter.Skip, filter.Take, filterExpression);
 
             return new()
             {
@@ -54,9 +62,16 @@ namespace OG.AIFileAnalyzer.Business.Historical
         }
 
         /// <inheritdoc/>
-        public async Task<MemoryStream> GetReport()
+        public async Task<MemoryStream> GetReport(HistoricalFilterDTO filter)
         {
-            var logs = await GetHistorical();
+            Expression<Func<LogEntity, bool>> filterExpression = entity =>
+                entity.ActionType == (filter.Action != ActionType.All ? filter.Action : entity.ActionType) &&
+                entity.Date >= (filter.DateStart ?? entity.Date) &&
+                entity.Date <= (filter.DateEnd ?? entity.Date) &&
+                entity.Description.Contains(!string.IsNullOrEmpty(filter.Description) ? filter.Description : entity.Description);
+
+            var logs = await _unitOfWork.Repository<LogEntity>().GetAsync(filterExpression);
+
             return _reportService.ExportToExcel(logs);
         }
     }

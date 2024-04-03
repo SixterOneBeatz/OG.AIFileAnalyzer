@@ -1,8 +1,12 @@
-﻿namespace OG.AIFileAnalyzer.Common.DTOs
+﻿using OG.AIFileAnalyzer.Common.Consts;
+
+namespace OG.AIFileAnalyzer.Common.DTOs
 {
-    public class HistoricalFilterDTO
+    public class HistoricalFilterDTO : BaseFilterDTO
     {
-        public int Skip { get; set; }
-        public int Take { get; set; }
+        public ActionType Action { get; set; }
+        public string Description { get; set; }
+        public DateTime? DateStart { get; set; }
+        public DateTime? DateEnd { get; set; }
     }
 }
