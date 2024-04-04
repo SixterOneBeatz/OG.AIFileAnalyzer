@@ -138,6 +138,9 @@ namespace OG.AIFileAnalyzer.Client.Pages.Historical
             await DialogService.OpenAsync<DialogAnalysisDetail>("Analysis Result", new()
             {
                 { "AnalysisData", data },
+            }, new()
+            {
+                Width = "50vw"
             });
         }
 
