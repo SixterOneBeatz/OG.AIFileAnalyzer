@@ -1,18 +1,25 @@
 ﻿@using OG.AIFileAnalyzer.Common.Consts
 
-<RadzenStack Gap="1.5rem">
+<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
     <RadzenText TextStyle="TextStyle.H6">Document type: @AnalysisData.DocumentType.ToString()</RadzenText>
-    @if (AnalysisData.DocumentType == DocType.Invoice)
-    {
-        <InvoiceFieldsTable Fields="AnalysisData.Data.Select(x => Tuple.Create(x.Key, x.Value))" />
-    }
-    else
-    {
-        <TextSummary Summaries="AnalysisData.Data" />
-    }
-    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-        <RadzenStack Orientation="Orientation.Horizontal">
-            <RadzenButton Text="Ok" Click="() => DialogService.Close(true)" Style="width: 80px;" />
-        </RadzenStack>
+        @if (AnalysisData.DocumentType == DocType.Invoice)
+        {
+            <RadzenTabs TabPosition="@TabPosition.Top" RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="Invoice Data">
+                        <InvoiceFieldsTable Fields=@(AnalysisData.Data.Where(x => !x.Key.Equals("Items")).ToDictionary()) />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Items">
+                        <InvoiceItemsTable RawItems=@(AnalysisData.Data.FirstOrDefault(x => x.Key.Equals("Items"))) />
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        }
+        else
+        {
+            <TextSummary Summaries="AnalysisData.Data" />
+        }
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Text="Ok" Click="() => DialogService.Close(true)" Style="width: 80px;" />
     </RadzenStack>
 </RadzenStack>

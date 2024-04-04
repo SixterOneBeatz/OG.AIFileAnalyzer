@@ -11,6 +11,6 @@ namespace OG.AIFileAnalyzer.Client.Pages.Analyzer
         /// Gets or sets the fields parameter.
         /// </summary>
         [Parameter]
-        public IEnumerable<Tuple<string, string>> Fields { get; set; }
+        public Dictionary<string, string> Fields { get; set; }
     }
 }

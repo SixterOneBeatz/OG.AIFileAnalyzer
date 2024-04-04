@@ -1,0 +1,11 @@
+﻿@using OG.AIFileAnalyzer.Common.DTOs
+
+<RadzenDataGrid Data="@Items" TItem="ItemDTO" Density="@Density.Compact">
+    <Columns>
+        <RadzenDataGridColumn TItem="ItemDTO" Property="ProductCode" Title="Code" />
+        <RadzenDataGridColumn TItem="ItemDTO" Property="Description" Title="Name" />
+        <RadzenDataGridColumn TItem="ItemDTO" Property="Quantity" Title="Quantity" />
+        <RadzenDataGridColumn TItem="ItemDTO" Property="UnitPrice" Title="Unit Price" />
+        <RadzenDataGridColumn TItem="ItemDTO" Property="Amount" Title="Amount" />
+    </Columns>
+</RadzenDataGrid>

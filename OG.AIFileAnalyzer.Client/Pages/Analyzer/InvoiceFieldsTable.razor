@@ -1,6 +1,6 @@
-﻿<RadzenDataGrid Data="@Fields" TItem="Tuple<string,string>" Density="@Density.Compact">
+﻿<RadzenDataGrid Data="@Fields" TItem="KeyValuePair<string,string>" Density="@Density.Compact">
     <Columns>
-        <RadzenDataGridColumn TItem="Tuple<string,string>" Property="Item1" Title="Field" />
-        <RadzenDataGridColumn TItem="Tuple<string,string>" Property="Item2" Title="Value" />
+        <RadzenDataGridColumn TItem="KeyValuePair<string,string>" Property="Key" Title="Field" />
+        <RadzenDataGridColumn TItem="KeyValuePair<string,string>" Property="Value" Title="Value" />
     </Columns>
 </RadzenDataGrid>

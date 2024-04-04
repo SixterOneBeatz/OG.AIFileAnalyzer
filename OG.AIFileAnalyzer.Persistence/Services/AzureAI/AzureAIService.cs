@@ -4,6 +4,7 @@ using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.AI.FormRecognizer.Models;
 using Azure.AI.TextAnalytics;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
 
 namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
 {
@@ -38,8 +39,21 @@ namespace OG.AIFileAnalyzer.Persistence.Services.AzureAI
 
             var documentFields = result.Documents.FirstOrDefault()?.Fields;
 
-            var keyValuePairs = documentFields?.Select(x => new { x.Key, Value = x.Value.Content }).ToDictionary(x => x.Key, y => y.Value)
-                                ?? new Dictionary<string, string>();
+            var keyValuePairs = documentFields?
+                .Select(x => new { x.Key, Value = x.Value.Content })
+                .Where(y => y.Key != "Items").ToDictionary(x => x.Key, y => y.Value) ?? 
+                new ();
+
+            if (documentFields.TryGetValue("Items", out var invoiceItems) && invoiceItems.FieldType == DocumentFieldType.List)
+            {
+                var items = invoiceItems.Value.AsList()
+                    .Where(x => x.FieldType == DocumentFieldType.Dictionary && x.Value.AsDictionary().Count > 0)
+                    .Select(y => y.Value.AsDictionary()
+                    .ToDictionary(k => k.Key, v => v.Value.Content));
+
+                keyValuePairs.Add("Items", JsonSerializer.Serialize(items));
+                keyValuePairs.Add("TotalItems", $"{items.Count()}");
+            }
 
             return keyValuePairs;
         }
