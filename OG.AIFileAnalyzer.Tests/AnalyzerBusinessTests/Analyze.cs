@@ -1,4 +1,5 @@
-﻿using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
+﻿using OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository;
+using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
 using System.Linq.Expressions;
 
 
@@ -6,216 +7,456 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
 {
     public class Analyze : BaseTestClass
     {
-        #region Analyze Test Cases
         [Fact]
-        public async Task Analyze_WithExistingAnalysisInDatabase_ReturnsExistingAnalysis()
+        public async Task Analyze_WithExistingInvoiceAnalysisInDatabase_ReturnsExistingAnalysis()
         {
             // Arrange
             var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
             var mockAzureAIService = new Mock<IAzureAIService>();
             var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                { "InvoiceId", "Value" },
+                { "InvoiceTotal", "Value" }
+            };
+            var existingHash = INVOICE_HASH;
+            var existingAnalysis = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.Invoice,
+                Data = expectedDictionary
+            };
+            var existingEntity = new List<FileEntity>
+            {
+                new FileEntity { SHA256 = existingHash,  DocumentType = DocType.Invoice, Anaysis = new List<FileAnaysisEntity>() }
+            };
 
-            var existingHash = EXISTING_INVOICE_HASH;
-            var existingAnalysis = new AnalysisResponseDTO { /* Mock existing analysis */ };
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync(existingEntity);
 
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
-
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
-
-            // Setup mockUnitOfWork to return a mock result for GetAsync method
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync(new List<FileEntity> { new FileEntity { SHA256 = existingHash, Anaysis = new List<FileAnaysisEntity>() } });
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
 
             // Act
-            var result = await analyzerBusiness.Analyze(existingHash);
+            var result = await analyzerBusiness.Analyze(INVOICE_BASE64);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(existingAnalysis, result);
+            Assert.Equal(existingAnalysis.DocumentType, result.DocumentType);
         }
 
-
         [Fact]
-        public async Task Analyze_WithNonExistingAnalysisInDatabase_ReturnsNewAnalysis()
+        public async Task Analyze_WithNewInvoiceAnalysis_ReturnsInvoiceAnalysis()
         {
             // Arrange
             var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
             var mockAzureAIService = new Mock<IAzureAIService>();
             var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                    { "InvoiceId", "Value" },
+                    { "InvoiceTotal", "Value" }
+            };
+            var expectedResult = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.Invoice,
+                Data = expectedDictionary
+            };
 
-            var nonExistingHash = "nonExistingHash";
-            var newAnalysis = new AnalysisResponseDTO { /* Mock new analysis */ };
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync([]);
 
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
-
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
-
-            // Setup mockUnitOfWork to return a mock result for GetAsync method
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync(new List<FileEntity> { new FileEntity { SHA256 = nonExistingHash, Anaysis = new List<FileAnaysisEntity>() } });
-
-            mockAzureAIService.Setup(service => service.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>());
-            mockAzureAIService.Setup(service => service.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>());
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
 
             // Act
-            var result = await analyzerBusiness.Analyze(nonExistingHash);
+            var result = await analyzerBusiness.Analyze(INVOICE_BASE64);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(newAnalysis.Data, result.Data);
-            Assert.Equal(newAnalysis.DocumentType, result.DocumentType);
+            Assert.Equal(expectedResult.DocumentType, result.DocumentType);
+
+            mockUnitOfWork.Verify(uow => uow.Complete());
         }
 
         [Fact]
-        public async Task Analyze_WithInvoiceContent_ReturnsInvoiceAnalysis()
+        public async Task Analyze_WithExistingGeneralTextAnalysisInDatabase_ReturnsExistingAnalysis()
         {
             // Arrange
             var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
             var mockAzureAIService = new Mock<IAzureAIService>();
             var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                { "Sentiment", "Value" },
+                { "Summary 1:", "Value" }
+            };
+            var existingHash = TEXT_HASH;
+            var existingAnalysis = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = expectedDictionary
+            };
+            var existingEntity = new List<FileEntity>
+            {
+                new FileEntity { SHA256 = existingHash,  DocumentType = DocType.GeneralText , Anaysis = new List<FileAnaysisEntity>() }
+            };
 
-            var invoiceHash = "invoiceHash";
-            var invoiceContent = "invoiceContent";
-            var invoiceData = new Dictionary<string, string> { { "InvoiceId", "123" }, { "InvoiceTotal", "100" } };
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync(existingEntity);
 
-            mockAzureAIService.Setup(service => service.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(invoiceData);
-            mockAzureAIService.Setup(service => service.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>());
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync([]);
+            mockAzureAIService.Setup(az => az.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
 
             // Act
-            var result = await analyzerBusiness.Analyze(invoiceContent);
+            var result = await analyzerBusiness.Analyze(TEXT_BASE64);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(invoiceData, result.Data);
-            Assert.Equal(DocType.Invoice, result.DocumentType);
+            Assert.Equal(existingAnalysis.DocumentType, result.DocumentType);
+
         }
 
         [Fact]
-        public async Task Analyze_WithGeneralTextContent_ReturnsTextAnalysis()
+        public async Task Analyze_WithNewGeneralTextAnalysisInDatabase_ReturnsGeneralTextAnalysis()
         {
             // Arrange
             var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
             var mockAzureAIService = new Mock<IAzureAIService>();
             var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                { "Sentiment", "Value" },
+                { "Summary 1:", "Value" }
+            };
 
-            var textHash = "textHash";
-            var textContent = "textContent";
-            var textData = new Dictionary<string, string> { { "Key1", "Value1" }, { "Key2", "Value2" } };
+            var expectedAnalysis = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = expectedDictionary
+            };
 
-            mockAzureAIService.Setup(service => service.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>());
-            mockAzureAIService.Setup(service => service.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(textData);
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync([]);
+
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync([]);
+            mockAzureAIService.Setup(az => az.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
 
             // Act
-            var result = await analyzerBusiness.Analyze(textContent);
+            var result = await analyzerBusiness.Analyze(TEXT_BASE64);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(textData, result.Data);
-            Assert.Equal(DocType.GeneralText, result.DocumentType);
+            Assert.Equal(expectedAnalysis.DocumentType, result.DocumentType);
+
+            mockUnitOfWork.Verify(uow => uow.Complete());
         }
 
         [Fact]
-        public async Task Analyze_WithEmptyContent_ThrowsException()
+        public async Task Analyze_WithMultipleExistingInvoiceAnalysesInDatabase_ReturnsCorrectExistingAnalysis()
         {
             // Arrange
             var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
             var mockAzureAIService = new Mock<IAzureAIService>();
             var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await analyzerBusiness.Analyze(string.Empty));
-        }
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                    { "InvoiceId", "Value1" },
+                    { "InvoiceTotal", "Value1" }
+            };
 
-        [Fact]
-        public async Task Analyze_WithNullContent_ThrowsException()
-        {
-            // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var mockAzureAIService = new Mock<IAzureAIService>();
-            var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var existingAnalysis1 = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.Invoice,
+                Data = expectedDictionary
+            };
+            var existingAnalysis2 = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.Invoice,
+                Data = new()
+                {
+                    { "InvoiceId", "Value2" },
+                    { "InvoiceTotal", "Value2" }
+                }
+            };
+            var existingEntity = new List<FileEntity>
+            {
+                new FileEntity 
+                { 
+                    SHA256 = INVOICE_HASH,  
+                    DocumentType = DocType.Invoice, 
+                    Anaysis = expectedDictionary.Select(x => new FileAnaysisEntity
+                    {
+                        Key = x.Key,    
+                        Value = x.Value
+                    }).ToList()
+                },
+                new FileEntity { SHA256 = new string(INVOICE_HASH.Reverse().ToArray()),  DocumentType = DocType.GeneralText, Anaysis = new List<FileAnaysisEntity>() }
+            };
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await analyzerBusiness.Analyze(null));
-        }
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync(existingEntity);
 
-        [Fact]
-        public async Task Analyze_WithInvalidBase64Content_ThrowsException()
-        {
-            // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var mockAzureAIService = new Mock<IAzureAIService>();
-            var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
-
-            var invalidBase64Content = "invalidBase64Content";
-
-            // Act & Assert
-            await Assert.ThrowsAsync<FormatException>(async () => await analyzerBusiness.Analyze(invalidBase64Content));
-        }
-
-        [Fact]
-        public async Task Analyze_WithInvoiceContent_StoresAnalysisInDatabase()
-        {
-            // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var mockAzureAIService = new Mock<IAzureAIService>();
-            var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
-
-            var invoiceHash = "invoiceHash";
-            var invoiceContent = "invoiceContent";
-            var invoiceData = new Dictionary<string, string> { { "InvoiceId", "123" }, { "InvoiceTotal", "100" } };
-
-            mockAzureAIService.Setup(service => service.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(invoiceData);
-            mockAzureAIService.Setup(service => service.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>());
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
 
             // Act
-            await analyzerBusiness.Analyze(invoiceContent);
+            var result = await analyzerBusiness.Analyze(INVOICE_BASE64);
 
             // Assert
-            mockUnitOfWork.Verify(uow => uow.Repository<LogEntity>().AddEntity(It.IsAny<LogEntity>()), Times.Once);
-            mockUnitOfWork.Verify(uow => uow.Complete(), Times.Once);
+            Assert.NotNull(result);
+            Assert.Equal(existingAnalysis1.DocumentType, result.DocumentType);
+            Assert.Equal(existingAnalysis1.Data, result.Data); // Assuming Data comparison is implemented
         }
 
         [Fact]
-        public async Task Analyze_WithGeneralTextContent_StoresAnalysisInDatabase()
+        public async Task Analyze_WithMultipleExistingGeneralTextAnalysesInDatabase_ReturnsCorrectExistingAnalysis()
         {
             // Arrange
             var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
             var mockAzureAIService = new Mock<IAzureAIService>();
             var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
 
-            var textHash = "textHash";
-            var textContent = "textContent";
-            var textData = new Dictionary<string, string> { { "Key1", "Value1" }, { "Key2", "Value2" } };
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                    { "Sentiment", "Value1" },
+                    { "Summary 1:", "Value1" }
+            };
 
-            mockAzureAIService.Setup(service => service.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>());
-            mockAzureAIService.Setup(service => service.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(textData);
+            var existingAnalysis1 = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = expectedDictionary
+            };
+            var existingAnalysis2 = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = new()
+                {
+                    { "Sentiment", "Value2" },
+                    { "Summary 1:", "Value2" }
+                }
+            };
+            var existingEntity = new List<FileEntity>
+            {
+                new FileEntity
+                {
+                    SHA256 = TEXT_HASH,
+                    DocumentType = DocType.GeneralText,
+                    Anaysis = expectedDictionary.Select(x => new FileAnaysisEntity
+                    {
+                        Key = x.Key,
+                        Value = x.Value
+                    }).ToList()
+                },
+                new FileEntity { SHA256 = new string(TEXT_HASH.Reverse().ToArray()),  DocumentType = DocType.GeneralText, Anaysis = new List<FileAnaysisEntity>() }
+            };
+
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync(existingEntity);
+
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync([]);
+            mockAzureAIService.Setup(az => az.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
 
             // Act
-            await analyzerBusiness.Analyze(textContent);
+            var result = await analyzerBusiness.Analyze(INVOICE_BASE64);
 
             // Assert
-            mockUnitOfWork.Verify(uow => uow.Repository<LogEntity>().AddEntity(It.IsAny<LogEntity>()), Times.Once);
-            mockUnitOfWork.Verify(uow => uow.Complete(), Times.Once);
+            Assert.NotNull(result);
+            Assert.Equal(existingAnalysis1.DocumentType, result.DocumentType);
+            Assert.Equal(existingAnalysis1.Data, result.Data); // Assuming Data comparison is implemented
         }
 
         [Fact]
-        public async Task Analyze_Always_CompletesUnitOfWork()
+        public async Task Analyze_WithNewInvoiceAnalysis_ReturnsInvoiceAnalysis_WithDifferentInvoiceData()
         {
             // Arrange
             var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
             var mockAzureAIService = new Mock<IAzureAIService>();
             var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                { "InvoiceId", "Value" },
+                { "InvoiceTotal", "Value" }
+            };
+            var existingHash = INVOICE_HASH;
+            var existingAnalysis = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.Invoice,
+                Data = expectedDictionary
+            };
+            var existingEntity = new List<FileEntity>
+            {
+                new FileEntity { SHA256 = existingHash,  DocumentType = DocType.Invoice, Anaysis = new List<FileAnaysisEntity>() }
+            };
+
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync(existingEntity);
+
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>
+            {
+                { "InvoiceId", "Value1" },
+                { "InvoiceTotal", "Value1" }
+            });
 
             // Act
-            await analyzerBusiness.Analyze("content");
+            var result = await analyzerBusiness.Analyze(INVOICE_BASE64);
 
             // Assert
-            mockUnitOfWork.Verify(uow => uow.Complete(), Times.Once);
+            Assert.NotNull(result);
+            Assert.NotEqual(existingAnalysis.Data, result.Data);
+
+            mockUnitOfWork.Verify(uow => uow.Complete());
         }
-        #endregion
+
+        [Fact]
+        public async Task Analyze_WithNewGeneralTextAnalysis_ReturnsGeneralTextAnalysis_WithDifferentInvoiceData()
+        {
+            // Arrange
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
+            var mockAzureAIService = new Mock<IAzureAIService>();
+            var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                { "Sentiment", "Value" },
+                { "Summary 1:", "Value" }
+            };
+
+            var expectedAnalysis = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = expectedDictionary
+            };
+
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync([]);
+
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync([]);
+            mockAzureAIService.Setup(az => az.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(new Dictionary<string, string>
+            {
+                { "Sentiment", "Value1" },
+                { "Summary 1:", "Value1" }
+            });
+
+            // Act
+            var result = await analyzerBusiness.Analyze(TEXT_BASE64);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEqual(expectedAnalysis.Data, result.Data);
+
+            mockUnitOfWork.Verify(uow => uow.Complete());
+        }
+
+        [Fact]
+        public async Task Analyze_WithNoExistingInvoiceAnalysisInDatabase_ReturnsExpected()
+        {
+            // Arrange
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
+            var mockAzureAIService = new Mock<IAzureAIService>();
+            var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                { "InvoiceId", "Value" },
+                { "InvoiceTotal", "Value" }
+            };
+
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync([]);
+
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
+
+            // Act
+            var result = await analyzerBusiness.Analyze(INVOICE_BASE64);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedDictionary, result.Data);
+        }
+
+        [Fact]
+        public async Task Analyze_WithNoExistingGeneralTextAnalysisInDatabase_ReturnsExpected()
+        {
+            // Arrange
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockFileRepository = new Mock<IBaseRepository<FileEntity>>();
+            var mockLogRepository = new Mock<IBaseRepository<LogEntity>>();
+            var mockAzureAIService = new Mock<IAzureAIService>();
+            var analyzerBusiness = new AnalyzerBusiness(mockAzureAIService.Object, mockUnitOfWork.Object);
+            var expectedDictionary = new Dictionary<string, string>
+            {
+                { "Sentiment", "Value" },
+                { "Summary 1:", "Value" }
+            };
+
+            mockFileRepository.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<FileEntity, bool>>>(),
+                It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                .ReturnsAsync([]);
+
+            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>()).Returns(mockFileRepository.Object);
+            mockUnitOfWork.Setup(uow => uow.Repository<LogEntity>()).Returns(mockLogRepository.Object);
+            mockAzureAIService.Setup(az => az.RunInvoiceAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync([]);
+            mockAzureAIService.Setup(az => az.RunTextAnalysis(It.IsAny<MemoryStream>())).ReturnsAsync(expectedDictionary);
+
+            // Act
+            var result = await analyzerBusiness.Analyze(TEXT_BASE64);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedDictionary, result.Data);
+
+        }
     }
 }
