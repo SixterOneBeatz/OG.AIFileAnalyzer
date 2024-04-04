@@ -1,235 +1,353 @@
-﻿using System.Linq.Expressions;
+﻿using OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository;
+using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
 {
     public class CheckForExistingAnalysis : BaseTestClass
     {
-        #region CheckForExistingAnalysis Test Cases
         [Fact]
-        public async Task CheckForExistingAnalysis_WithExistingAnalysis_ReturnsAnalysis()
+        public async Task CheckForExistingAnalysis_ExistingHash_ReturnsAnalysisResponseDTO()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
+            var hash = "existingHash";
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var azureAIMock = new Mock<IAzureAIService>();
 
-            var existingHash = "existingHash";
-            var existingAnalysis = new AnalysisResponseDTO { /* Mock existing analysis */ };
+            var analysisService = new AnalyzerBusiness(azureAIMock.Object, unitOfWorkMock.Object);
 
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
+            var existingFileEntity = new FileEntity
+            {
+                SHA256 = hash,
+                DocumentType = DocType.GeneralText,
+                Anaysis = new List<FileAnaysisEntity>
+                {
+                    new FileAnaysisEntity { Key = "Sentiment", Value = "Positive" },
+                    new FileAnaysisEntity { Key = "Summary", Value = "This is a test summary." }
+                }
+            };
 
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
+            var expectedAnalysisResponse = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = new Dictionary<string, string>
+                {
+                    { "Sentiment", "Positive" },
+                    { "Summary", "This is a test summary." }
+                }
+            };
 
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync(new List<FileEntity> { new FileEntity { SHA256 = existingHash, Anaysis = new List<FileAnaysisEntity>() } });
+            var files = new List<FileEntity> { existingFileEntity };
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<FileEntity, bool>>>(), It.IsAny<List<System.Linq.Expressions.Expression<System.Func<FileEntity, object>>>>()))
+                .ReturnsAsync(files);
 
             // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(existingHash);
+            var result = await analysisService.CheckForExistingAnalysis(hash);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(existingAnalysis, result);
+            Assert.Equal(expectedAnalysisResponse.DocumentType, result.DocumentType);
+            Assert.Equal(expectedAnalysisResponse.Data, result.Data);
         }
 
         [Fact]
-        public async Task CheckForExistingAnalysis_WithNonExistingAnalysis_ReturnsNull()
+        public async Task CheckForExistingAnalysis_EmptyHash_ReturnsNull()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
 
-            var nonExistingHash = "nonExistingHash";
-
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
-
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
-
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync(new List<FileEntity>());
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<FileEntity, bool>>>(), It.IsAny<List<System.Linq.Expressions.Expression<System.Func<FileEntity, object>>>>()))
+                .ReturnsAsync([]);
 
             // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(nonExistingHash);
+            var result = await analysisService.CheckForExistingAnalysis(string.Empty);
 
             // Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public async Task CheckForExistingAnalysis_WithEmptyHash_ReturnsNull()
+        public async Task CheckForExistingAnalysis_NonExistingHash_ReturnsNull()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
 
-            string emptyHash = string.Empty;
+            var hash = INVOICE_HASH;
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync([]);
 
             // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(emptyHash);
+            var result = await analysisService.CheckForExistingAnalysis(hash);
 
             // Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public async Task CheckForExistingAnalysis_WithNullHash_ReturnsNull()
+        public async Task CheckForExistingAnalysis_EmptyAnalysis_ReturnsEmptyAnalysisResponseDTO()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
 
-            string? nullHash = null;
+            var files = new List<FileEntity> { new FileEntity { SHA256 = string.Empty, Anaysis = new List<FileAnaysisEntity>() } };
 
-            // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(nullHash);
-
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task CheckForExistingAnalysis_WithInvalidHash_ReturnsNull()
-        {
-            // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
-
-            var invalidHash = "invalidHash";
-
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
-
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
-
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync((List<FileEntity>?)null); // Simulating invalid hash
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync(files);
 
             // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(invalidHash);
-
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task CheckForExistingAnalysis_WithMultipleAnalysis_ReturnsFirstMatch()
-        {
-            // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
-
-            var existingHash = "existingHash";
-            var existingAnalysis = new AnalysisResponseDTO { /* Mock existing analysis */ };
-
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
-
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
-
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync(new List<FileEntity>
-                          {
-                              new FileEntity { SHA256 = existingHash, Anaysis = new List<FileAnaysisEntity>() },
-                              new FileEntity { SHA256 = "anotherHash", Anaysis = new List<FileAnaysisEntity>() }
-                          });
-
-            // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(existingHash);
+            var result = await analysisService.CheckForExistingAnalysis(string.Empty);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(existingAnalysis, result);
+            Assert.Empty(result.Data);
         }
 
         [Fact]
-        public async Task CheckForExistingAnalysis_WithSpecificDocumentType_ReturnsMatchingAnalysis()
+        public async Task CheckForExistingAnalysis_ValidHash_ReturnsAnalysisResponseDTO()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
 
-            var existingHash = "existingHash";
-            var existingAnalysis = new AnalysisResponseDTO { /* Mock existing analysis */ };
+            var hash = TEXT_HASH;
 
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
+            var fileEntity = new FileEntity
+            {
+                DocumentType = DocType.GeneralText,
+                SHA256 = hash,
+                Anaysis = new List<FileAnaysisEntity>
+                {
+                    new FileAnaysisEntity { Key = "Key1", Value = "Value1" },
+                    new FileAnaysisEntity { Key = "Key2", Value = "Value2" }
+                }
+            };
 
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
+            var files = new List<FileEntity> { fileEntity };
 
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync(new List<FileEntity>
-                          {
-                              new FileEntity { SHA256 = existingHash, Anaysis = new List<FileAnaysisEntity>() { /* Mock analysis with specific document type */ } },
-                              new FileEntity { SHA256 = "anotherHash", Anaysis = new List<FileAnaysisEntity>() }
-                          });
+            var expectedAnalysisResponse = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = new Dictionary<string, string>
+                {
+                    { "Key1", "Value1" },
+                    { "Key2", "Value2" }
+                }
+            };
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync(files);
 
             // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(existingHash);
+            var result = await analysisService.CheckForExistingAnalysis(hash);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(existingAnalysis, result);
+            Assert.Equal(expectedAnalysisResponse.DocumentType, result.DocumentType);
+            Assert.Equal(expectedAnalysisResponse.Data, result.Data);
         }
 
         [Fact]
-        public async Task CheckForExistingAnalysis_WithSpecificDocumentType_NoMatch_ReturnsNull()
+        public async Task CheckForExistingAnalysis_MultipleFilesWithSameHash_ReturnsFirstAnalysisResponseDTO()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
 
-            var existingHash = "existingHash";
+            var hash = INVOICE_HASH;
 
-            // Setup predicate for GetAsync method
-            Expression<Func<FileEntity, bool>> predicate = It.IsAny<Expression<Func<FileEntity, bool>>>();
+            var fileEntity1 = new FileEntity
+            {
+                DocumentType = DocType.GeneralText,
+                SHA256 = hash,
+                Anaysis = new List<FileAnaysisEntity> { new FileAnaysisEntity { Key = "Key1", Value = "Value1" } }
+            };
 
-            // Setup includes for GetAsync method
-            List<Expression<Func<FileEntity, object>>> includes = It.IsAny<List<Expression<Func<FileEntity, object>>>>();
+            var fileEntity2 = new FileEntity
+            {
+                DocumentType = DocType.GeneralText,
+                SHA256 = hash,
+                Anaysis = new List<FileAnaysisEntity> { new FileAnaysisEntity { Key = "Key2", Value = "Value2" } }
+            };
 
-            // Setup mockUnitOfWork to return a mock result for GetAsync method
-            mockUnitOfWork.Setup(uow => uow.Repository<FileEntity>().GetAsync(predicate, includes))
-                          .ReturnsAsync(new List<FileEntity>
-                          {
-                              new FileEntity { SHA256 = existingHash, Anaysis = new List<FileAnaysisEntity>() { /* Mock analysis with specific document type */ } },
-                              new FileEntity { SHA256 = "anotherHash", Anaysis = new List<FileAnaysisEntity>() }
-                          });
+            var files = new List<FileEntity> { fileEntity1, fileEntity2 };
+
+            var expectedAnalysisResponse = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = new Dictionary<string, string> { { "Key1", "Value1" } }
+            };
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync(files);
 
             // Act
-            var result = await analyzerBusiness.CheckForExistingAnalysis(existingHash);
+            var result = await analysisService.CheckForExistingAnalysis(hash);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedAnalysisResponse.DocumentType, result.DocumentType);
+            Assert.Equal(expectedAnalysisResponse.Data, result.Data);
+        }
+
+        [Fact]
+        public async Task CheckForExistingAnalysis_MultipleFilesWithDifferentHashes_ReturnsNull()
+        {
+            // Arrange
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
+
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync([]);
+
+            // Act
+            var result = await analysisService.CheckForExistingAnalysis(string.Empty);
 
             // Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public async Task CheckForExistingAnalysis_WithNullUnitOfWork_ThrowsException()
+        public async Task CheckForExistingAnalysis_ValidHashEmptyAnalysis_ReturnsEmptyAnalysis()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, null); // Passing null unit of work intentionally
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await analyzerBusiness.CheckForExistingAnalysis("hash"));
+            var hash = TEXT_HASH;
+
+            var fileEntity = new FileEntity
+            {
+                SHA256 = hash,
+                Anaysis = new List<FileAnaysisEntity>()
+            };
+
+            var files = new List<FileEntity> { fileEntity };
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync(files);
+
+            // Act
+            var result = await analysisService.CheckForExistingAnalysis(hash);
+
+            // Assert
+            Assert.Empty(result.Data);
         }
 
         [Fact]
-        public async Task CheckForExistingAnalysis_Always_CompletesUnitOfWork()
+        public async Task CheckForExistingAnalysis_ValidHashWithNullAnalysisValue_ReturnsGeneralTextAnalysisResponseDTO()
         {
             // Arrange
-            var mockUnitOfWork = new Mock<IUnitOfWork>();
-            var analyzerBusiness = new AnalyzerBusiness(null, mockUnitOfWork.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
+
+            var hash = "validHashWithNullAnalysisValue";
+
+            var fileEntity = new FileEntity
+            {
+                DocumentType = DocType.GeneralText,
+                SHA256 = hash,
+                Anaysis = new List<FileAnaysisEntity>
+                {
+                    new FileAnaysisEntity { Key = "Key1", Value = "Value1" },
+                    new FileAnaysisEntity { Key = "Key2", Value = null }
+                }
+            };
+
+            var files = new List<FileEntity> { fileEntity };
+
+            var expectedAnalysisResponse = new AnalysisResponseDTO
+            {
+                DocumentType = DocType.GeneralText,
+                Data = new Dictionary<string, string>
+                {
+                    { "Key1", "Value1" },
+                    { "Key2", null }
+                }
+            };
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync(files);
 
             // Act
-            await analyzerBusiness.CheckForExistingAnalysis("hash");
+            var result = await analysisService.CheckForExistingAnalysis(hash);
 
             // Assert
-            mockUnitOfWork.Verify(uow => uow.Complete(), Times.Once);
+            Assert.NotNull(result);
+            Assert.Equal(expectedAnalysisResponse.DocumentType, result.DocumentType);
+            Assert.Equal(expectedAnalysisResponse.Data, result.Data);
         }
-        #endregion
+
+        [Fact]
+        public async Task CheckForExistingAnalysis_ValidHashWithNullAnalysisValue_ReturnsInvoiceAnalysisResponseDTO()
+        {
+            // Arrange
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var fileRepositoryMock = new Mock<IBaseRepository<FileEntity>>();
+            var analysisService = new AnalyzerBusiness(new Mock<IAzureAIService>().Object, unitOfWorkMock.Object);
+
+            var hash = "validHashWithNullAnalysisValue";
+
+            var fileEntity = new FileEntity
+            {
+                SHA256 = hash,
+                Anaysis = new List<FileAnaysisEntity>
+                {
+                    new FileAnaysisEntity { Key = "Key1", Value = "Value1" },
+                    new FileAnaysisEntity { Key = "Key2", Value = null }
+                }
+            };
+
+            var files = new List<FileEntity> { fileEntity };
+
+            var expectedAnalysisResponse = new AnalysisResponseDTO
+            {
+                Data = new Dictionary<string, string>
+                {
+                    { "Key1", "Value1" },
+                    { "Key2", null }
+                }
+            };
+
+            unitOfWorkMock.Setup(uow => uow.Repository<FileEntity>()).Returns(fileRepositoryMock.Object);
+            fileRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<FileEntity, bool>>>(), It.IsAny<List<Expression<Func<FileEntity, object>>>>()))
+                             .ReturnsAsync(files);
+
+            // Act
+            var result = await analysisService.CheckForExistingAnalysis(hash);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedAnalysisResponse.DocumentType, result.DocumentType);
+            Assert.Equal(expectedAnalysisResponse.Data, result.Data);
+        }
     }
 }

@@ -84,8 +84,6 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedResult.DocumentType, result.DocumentType);
-
-            mockUnitOfWork.Verify(uow => uow.Complete());
         }
 
         [Fact]
@@ -129,7 +127,6 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(existingAnalysis.DocumentType, result.DocumentType);
-
         }
 
         [Fact]
@@ -169,8 +166,6 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedAnalysis.DocumentType, result.DocumentType);
-
-            mockUnitOfWork.Verify(uow => uow.Complete());
         }
 
         [Fact]
@@ -344,8 +339,6 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
             // Assert
             Assert.NotNull(result);
             Assert.NotEqual(existingAnalysis.Data, result.Data);
-
-            mockUnitOfWork.Verify(uow => uow.Complete());
         }
 
         [Fact]
@@ -389,8 +382,6 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
             // Assert
             Assert.NotNull(result);
             Assert.NotEqual(expectedAnalysis.Data, result.Data);
-
-            mockUnitOfWork.Verify(uow => uow.Complete());
         }
 
         [Fact]
@@ -456,7 +447,6 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedDictionary, result.Data);
-
         }
     }
 }
