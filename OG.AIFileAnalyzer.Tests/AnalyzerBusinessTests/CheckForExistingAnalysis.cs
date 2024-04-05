@@ -1,11 +1,6 @@
 ﻿using OG.AIFileAnalyzer.Persistence.DataAccess.Repositories.BaseRepository;
 using OG.AIFileAnalyzer.Persistence.Services.AzureAI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
 {

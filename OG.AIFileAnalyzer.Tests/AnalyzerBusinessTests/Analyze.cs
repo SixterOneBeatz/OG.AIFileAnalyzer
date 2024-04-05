@@ -200,13 +200,13 @@ namespace OG.AIFileAnalyzer.Tests.AnalyzerBusinessTests
             };
             var existingEntity = new List<FileEntity>
             {
-                new FileEntity 
-                { 
-                    SHA256 = INVOICE_HASH,  
-                    DocumentType = DocType.Invoice, 
+                new FileEntity
+                {
+                    SHA256 = INVOICE_HASH,
+                    DocumentType = DocType.Invoice,
                     Anaysis = expectedDictionary.Select(x => new FileAnaysisEntity
                     {
-                        Key = x.Key,    
+                        Key = x.Key,
                         Value = x.Value
                     }).ToList()
                 },

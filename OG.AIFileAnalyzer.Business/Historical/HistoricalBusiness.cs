@@ -12,6 +12,7 @@ namespace OG.AIFileAnalyzer.Business.Historical
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IReportService _reportService = reportService;
 
+        /// <inheritdoc/>
         public async Task AddHistorical(LogEntity entity)
         {
             await _unitOfWork.Repository<LogEntity>().AddEntity(entity);
@@ -37,11 +38,6 @@ namespace OG.AIFileAnalyzer.Business.Historical
             return result;
         }
 
-        /// <inheritdoc/>
-        public async Task<List<LogEntity>> GetHistorical()
-        {
-            return await _unitOfWork.Repository<LogEntity>().GetAllAsync();
-        }
 
         /// <inheritdoc/>
         public async Task<HistoricalResultDTO> GetHistorical(HistoricalFilterDTO filter)
